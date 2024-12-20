@@ -1,12 +1,21 @@
 ﻿using System.Net.WebSockets;
+using System.Text;
+using System.Text.Json;
+using GameServer.Common;
 
 namespace GameServer.Handlers;
 
-public class LoginHandler:IWebSocketHandler
+public class LoginHandler:BaseWebSocketHandler<DeviceLoginRequest, LoginResponse>
 {
-    public string Route { get; } = "login";
-    public Task HandleAsync(HttpContext context, WebSocket webSocket)
+    public override string Route { get; } = "login";
+    public LoginHandler(WebSocketMessageSerializer serializer) 
+        : base(serializer)
     {
-        throw new NotImplementedException();
+    }
+
+    public override Task<LoginResponse> HandleAsync(DeviceLoginRequest request)
+    {
+        var playerId = $"Player-{request.DeviceId}";
+        return Task.FromResult(new LoginResponse (playerId));
     }
 }

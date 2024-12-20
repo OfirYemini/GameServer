@@ -1,11 +1,18 @@
 ﻿using System.Net.WebSockets;
+using GameServer.Common;
 
 namespace GameServer.Handlers;
 
-public class UpdateResourcesHandler:IWebSocketHandler
+public class UpdateResourcesHandler:BaseWebSocketHandler<UpdateResourceRequest, UpdateResourceResponse>
 {
-    public string Route { get; } = "update";
-    public Task HandleAsync(HttpContext context, WebSocket webSocket)
+    public override string Route { get; } = "update";
+    
+    public UpdateResourcesHandler(WebSocketMessageSerializer serializer) 
+    : base(serializer)
+    {
+    }
+    
+    public override Task<UpdateResourceResponse> HandleAsync(UpdateResourceRequest input)
     {
         throw new NotImplementedException();
     }

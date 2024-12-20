@@ -30,7 +30,7 @@ app.Use(async (HttpContext context,RequestDelegate next) =>
     if (context.WebSockets.IsWebSocketRequest)
     {
         var webSocketRouter = context.RequestServices.GetRequiredService<WebSocketRouter>();
-        using var webSocket = await context.WebSockets.AcceptWebSocketAsync();
+        using var webSocket = await context.WebSockets.AcceptWebSocketAsync();//todo: should I use var cancellationToken = context.RequestAborted; 
         await webSocketRouter.RouteAsync(context, webSocket);
     }
     else

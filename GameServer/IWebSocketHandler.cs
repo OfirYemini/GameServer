@@ -1,4 +1,5 @@
 ﻿using System.Net.WebSockets;
+using Google.Protobuf.Reflection;
 
 namespace GameServer;
 
@@ -10,6 +11,6 @@ namespace GameServer;
 
 public interface IWebSocketHandler
 {
-    string Route { get; }
+    Request.InnerMessageOneofCase MessageDescriptor { get; }
     Task HandleWebSocketAsync(HttpContext context, WebSocket webSocket);
 }

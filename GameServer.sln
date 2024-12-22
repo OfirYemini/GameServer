@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameServer", "GameServer\Ga
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameClient", "GameClient\GameClient.csproj", "{4136FF23-CF0D-4A6E-BF00-47ADEB0138C3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Game.Contracts", "Game.Contracts\Game.Contracts.csproj", "{DAA5DC8D-009B-4423-BC97-55BB2CD7E2D3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{4136FF23-CF0D-4A6E-BF00-47ADEB0138C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4136FF23-CF0D-4A6E-BF00-47ADEB0138C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4136FF23-CF0D-4A6E-BF00-47ADEB0138C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DAA5DC8D-009B-4423-BC97-55BB2CD7E2D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DAA5DC8D-009B-4423-BC97-55BB2CD7E2D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DAA5DC8D-009B-4423-BC97-55BB2CD7E2D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DAA5DC8D-009B-4423-BC97-55BB2CD7E2D3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

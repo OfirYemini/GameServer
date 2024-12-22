@@ -1,3 +1,3 @@
 ﻿namespace GameServer.Common;
 
-public record LoginResponse(string PlayerId);
+public record LoginResponse(int PlayerId);

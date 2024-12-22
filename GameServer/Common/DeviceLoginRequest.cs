@@ -1,3 +1,3 @@
 ﻿namespace GameServer.Common;
 
-public record DeviceLoginRequest(string DeviceId);
+public record DeviceLoginRequest(Guid DeviceId);

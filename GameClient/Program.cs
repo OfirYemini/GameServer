@@ -1,35 +1,12 @@
-﻿using System.Net.WebSockets;
-using System.Text;
+﻿using GameClient;
 
-Console.WriteLine("Starting WebSocket client...");
+var client = new WebSocketClient("ws://localhost:5214/ws");
 
-using var client = new ClientWebSocket();
+await client.ConnectAsync();
 
-try
-{
-    // Connect to the WebSocket server
-    var serverUri = new Uri("ws://localhost:5214/ws/chat"); // Adjust path to match server route
-    await client.ConnectAsync(serverUri, CancellationToken.None);
-    Console.WriteLine($"Connected to {serverUri}");
+// Send a login request
+await client.SendLoginRequestAsync("550e8400-e29b-41d4-a716-446655440000");
 
-    // Send a message to the server
-    string messageToSend = "Hello, WebSocket server!";
-    var messageBytes = Encoding.UTF8.GetBytes(messageToSend);
-    await client.SendAsync(new ArraySegment<byte>(messageBytes), WebSocketMessageType.Text, true, CancellationToken.None);
-    Console.WriteLine($"Sent: {messageToSend}");
-
-    // Receive a response from the server
-    var buffer = new byte[1024 * 4];
-    var result = await client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-
-    string serverResponse = Encoding.UTF8.GetString(buffer, 0, result.Count);
-    Console.WriteLine($"Received: {serverResponse}");
-
-    // Close the WebSocket connection
-    await client.CloseAsync(WebSocketCloseStatus.NormalClosure, "Client closing", CancellationToken.None);
-    Console.WriteLine("WebSocket connection closed.");
-}
-catch (Exception ex)
-{
-    Console.WriteLine($"WebSocket error: {ex.Message}");
-}
+// Simulate a delay, then send an update request
+await Task.Delay(2000);
+await client.SendUpdateRequestAsync("coins", 100);

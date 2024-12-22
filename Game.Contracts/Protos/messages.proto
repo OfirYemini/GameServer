@@ -4,14 +4,16 @@ message LoginRequest {
   string deviceId = 1;  
 }
 
+message LoginResponse {
+  int32 playerId = 1;
+}
+
 message UpdateRequest {
   string resourceType = 1;
   int32 resourceValue = 2;
 }
 
-message Request {
-  oneof inner_message {
-    LoginRequest loginRequest = 1;
-    UpdateRequest updateRequest = 2;    
-  }
+message UpdateResponse {
+  string resourceType = 1;
+  int32 resourceBalance = 2;
 }

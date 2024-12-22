@@ -1,20 +1,20 @@
 ﻿using System.Net.WebSockets;
+using Game.Contracts;
 using GameServer.Common;
 using Google.Protobuf;
 using Google.Protobuf.Reflection;
 
 namespace GameServer.Handlers;
 
-public class UpdateResourcesHandler:BaseWebSocketHandler<UpdateResourceRequest, UpdateResourceResponse>
+public class UpdateResourcesHandler:IWebSocketHandler
 {
-    public override Request.InnerMessageOneofCase MessageDescriptor { get; } = Request.InnerMessageOneofCase.UpdateRequest;
-    protected override MessageParser Parser { get; } = UpdateRequest.Parser;
-    public UpdateResourcesHandler(IWebSocketMessageSerializer serializer) 
-    : base(serializer)
+    public MessageType MessageType { get; } = MessageType.UpdateRequest;
+    public MessageParser Parser { get; } = UpdateRequest.Parser;
+    public UpdateResourcesHandler()
     {
     }
     
-    public override Task<UpdateResourceResponse> HandleAsync(UpdateResourceRequest input)
+    public Task<IMessage> HandleMessageAsync(MemoryStream stream)
     {
         throw new NotImplementedException();
     }

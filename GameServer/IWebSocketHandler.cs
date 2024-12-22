@@ -1,4 +1,6 @@
 ﻿using System.Net.WebSockets;
+using Game.Contracts;
+using Google.Protobuf;
 using Google.Protobuf.Reflection;
 
 namespace GameServer;
@@ -11,6 +13,7 @@ namespace GameServer;
 
 public interface IWebSocketHandler
 {
-    Request.InnerMessageOneofCase MessageDescriptor { get; }
-    Task HandleWebSocketAsync(HttpContext context, WebSocket webSocket);
+    MessageType MessageType { get; }
+    
+    Task<IMessage> HandleMessageAsync(MemoryStream stream);
 }

@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices.JavaScript;
 using System.Text;
 using System.Text.Json;
+using Game.Contracts;
 using Google.Protobuf;
 using Google.Protobuf.Reflection;
 using Google.Protobuf.WellKnownTypes;
@@ -11,11 +12,11 @@ namespace GameServer;
 
 public class WebSocketRouter
 {
-    private readonly Dictionary<Request.InnerMessageOneofCase, IWebSocketHandler> _handlers;
+    private readonly Dictionary<MessageType,IWebSocketHandler> _handlers;
     
     public WebSocketRouter(IEnumerable<IWebSocketHandler> handlers)
     {
-        _handlers = handlers.ToDictionary(k=>k.MessageDescriptor, v => v);
+        _handlers = handlers.ToDictionary(k=>k.MessageType, v => v);
     }
     
     public async Task RouteAsync(HttpContext context, WebSocket webSocket)
@@ -30,14 +31,27 @@ public class WebSocketRouter
 
             using var stream = new MemoryStream(buffer, 0, result.Count);
 
-            // Read the first byte to determine the message type
-            //Any any = Any.Parser.ParseFrom(stream);
-            Request wrapper = Request.Parser.ParseFrom(stream);
+            // 1. Read the first byte (message type)
+            // Read the first byte as enum
+            var messageType = (MessageType)stream.ReadByte();
+
             
-            if (_handlers.TryGetValue(wrapper.InnerMessageCase, out var handler))
+            if (_handlers.TryGetValue(messageType, out var handler))
             {
+                var response = await handler.HandleMessageAsync(stream);
                 
-                await handler.HandleWebSocketAsync(context, webSocket);
+                using var responseStream = new MemoryStream();
+
+                response.WriteTo(responseStream);
+
+                byte[] bytes = responseStream.ToArray();
+
+                await webSocket.SendAsync(
+                    new ArraySegment<byte>(bytes),
+                    WebSocketMessageType.Binary,
+                    true,
+                    CancellationToken.None
+                );
             }
         }
 
@@ -57,8 +71,3 @@ public class WebSocketRouter
     
     
 }
-// public enum MessageType
-// {
-//     Login = 1,
-//     Update = 2
-// }

@@ -27,6 +27,7 @@ services.AddDbContextFactory<GameDbContext>(options =>
 
 services.AddSingleton<IWebSocketHandler, LoginHandler>();
 services.AddSingleton<IWebSocketHandler, UpdateResourcesHandler>();
+services.AddSingleton<IWebSocketHandler, SendGiftHandler>();
 services.AddSingleton<INotificationManager, NotificationManager>();
 services.AddSingleton<IGameRepository, GameRepository>();
 services.AddSingleton<IWebSocketMessageSerializer, WebSocketMessageSerializer>();

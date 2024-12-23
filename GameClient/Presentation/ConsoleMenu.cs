@@ -90,10 +90,10 @@ public class ConsoleMenu: BackgroundService
     private async Task HandleSendGift()
     {
         var friendId = GetValidInput<int>("Friend ID: ");
-        var resourceType = GetValidInput<ResourceType>("Resource Type (Coins=0,Rolls=1) : ");
+        var resourceType = GetValidInput<int>("Resource Type (Coins=0,Rolls=1) : ");
         var amount = GetValidInput<int>("Amount: ");
 
-        await _client.SendGiftAsync(friendId, resourceType, amount);
+        await _client.SendGiftAsync(friendId, (ResourceType)resourceType, amount);
     }
     
     private T GetValidInput<T>(string prompt)

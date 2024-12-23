@@ -126,7 +126,7 @@ public class GameServerWs : IGameServerWs,IDisposable
     {
         if (OnMessageReceived != null)
         {
-            OnMessageRecieved(serverResponse);
+            OnMessageReceived(serverResponse);
         }
     }
     

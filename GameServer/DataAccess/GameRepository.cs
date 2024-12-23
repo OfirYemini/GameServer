@@ -61,7 +61,7 @@ public class GameRepository:IGameRepository
         int newBalance = 0;
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
         
-        var playerBalance = await dbContext.PlayersBalances.FindAsync(playerId);
+        var playerBalance = await dbContext.PlayersBalances.FirstOrDefaultAsync(p=>p.PlayerId == playerId && p.ResourceType==(byte)resourceType);
 
         if (playerBalance == null)
         {
@@ -176,8 +176,9 @@ public class GameDbContext : DbContext
         modelBuilder.Entity<Player>()
             .Property(p => p.PlayerId)
             .HasAnnotation("SqlServer:Identity", "10000, 1");
-        
+
         modelBuilder.Entity<PlayerBalance>()
-            .HasKey(p => p.PlayerId);
+            .HasKey(p => new { p.PlayerId, p.ResourceType });
+
     }
 }

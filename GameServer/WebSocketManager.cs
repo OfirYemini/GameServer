@@ -49,41 +49,51 @@ public class WebSocketManager:IDisposable
     public async Task HandleWebSocketSessionAsync(HttpContext context, WebSocket webSocket)
     {
         var buffer = new byte[1024 * 4];
-        string sessionId = context.Connection.Id;
+        string connectionId = context.Connection.Id;
         PlayerInfo? playerInfo = null;
-        _logger.LogInformation("New websocket connection with id {connectionId} is initiated",sessionId);
+        _logger.LogInformation("New websocket connection with id {connectionId} is initiated",connectionId);
         while (webSocket.State == WebSocketState.Open)
         {
-            var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-            
-            using var inputStream = new MemoryStream(buffer, 0, result.Count);
-            
-            IMessage serverResponse;
-            
-            if (playerInfo == null)
+            try
             {
-                playerInfo = await HandleFirstMessageAsync(webSocket, sessionId,inputStream);
-                continue;
-            }
-            
-            var messageType = (MessageType)inputStream.ReadByte();
-            if (_handlers.TryGetValue(messageType, out var handler))
-            {
-                serverResponse = await handler.HandleMessageAsync(playerInfo,inputStream);
-            }
-            else
-            {
-                serverResponse = CreateServerError("message type is invalid");
-                _logger.LogError("Invalid request with message type {messageType} was attempted for session {connectionId}",messageType,sessionId);
-            }
-            
-            await SendMessageAsync(webSocket, serverResponse);
-        }
+                var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
 
+                using var inputStream = new MemoryStream(buffer, 0, result.Count);
+
+                IMessage serverResponse;
+
+                if (playerInfo == null)
+                {
+                    playerInfo = await HandleFirstMessageAsync(webSocket, connectionId, inputStream);
+                    continue;
+                }
+
+                var messageType = (MessageType)inputStream.ReadByte();
+                if (_handlers.TryGetValue(messageType, out var handler))
+                {
+                    serverResponse = await handler.HandleMessageAsync(playerInfo, inputStream);
+                }
+                else
+                {
+                    serverResponse = CreateServerError("message type is invalid");
+                    _logger.LogError(
+                        "Invalid request with message type {messageType} was attempted for session {connectionId}",
+                        messageType, connectionId);
+                }
+
+                await SendMessageAsync(webSocket, serverResponse);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e,"Websocket error for connection {connectionId}",connectionId);
+            }
+        }
+        
         if (playerInfo!=null)
         {
             _sessions.TryRemove(playerInfo.PlayerId, out _);    
         }
+        
         
         // else if (context.Request.Path == NoPath)
         // {
@@ -95,7 +105,7 @@ public class WebSocketManager:IDisposable
         // }
     }
 
-    private async Task<PlayerInfo?> HandleFirstMessageAsync(WebSocket webSocket, string sessionId, MemoryStream inputStream)
+    private async Task<PlayerInfo?> HandleFirstMessageAsync(WebSocket webSocket, string connectionId, MemoryStream inputStream)
     {
         IMessage serverResponse;
         PlayerInfo? playerInfo = null;
@@ -104,11 +114,11 @@ public class WebSocketManager:IDisposable
         if (messageType != MessageType.LoginRequest)
         {
             serverResponse = CreateServerError("player is not authenticated");
-            _logger.LogError("Unauthenticated request was attempted with connection {connectionId}",sessionId);    
+            _logger.LogError("Unauthenticated request was attempted with connection {connectionId}",connectionId);    
         }
         else
         {
-            var newPlayerInfo = new PlayerInfo(sessionId);
+            var newPlayerInfo = new PlayerInfo();
             serverResponse = await _handlers[MessageType.LoginRequest].HandleMessageAsync(newPlayerInfo, inputStream);
             var loginResponse = (serverResponse as ServerResponse)?.LoginResponse;
             if (loginResponse != null)

@@ -18,7 +18,13 @@ public record PlayerSession(string SessionId)
 
 public class SessionManager : ISessionManager//todo: implemet as redis
 {
+    private readonly ILogger<SessionManager> _logger;
     private readonly ConcurrentDictionary<string,PlayerSession> _sessions = new ConcurrentDictionary<string,PlayerSession>();
+
+    public SessionManager(ILogger<SessionManager> logger)
+    {
+        _logger = logger;
+    }
     public PlayerSession? GetSession(string sessionId)
     {
         _sessions.TryGetValue(sessionId, out PlayerSession? session);
@@ -39,7 +45,7 @@ public class SessionManager : ISessionManager//todo: implemet as redis
         bool isSessionRemoved = _sessions.TryRemove(sessionId, out _);
         if (!isSessionRemoved)
         {
-            Console.WriteLine($"session {sessionId} is not connected");
+            _logger.LogError("session {sessionId} is not connected",sessionId);
         }
 
         return isSessionRemoved;

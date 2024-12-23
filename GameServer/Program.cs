@@ -4,6 +4,7 @@ using GameServer.Common;
 using GameServer.DataAccess;
 using GameServer.Handlers;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,9 @@ WebSocketOptions wsOptions = new WebSocketOptions()
     //AllowedOrigins = { "https://localhost:4201" } // todo: use certificate
     
 };
+
+builder.Host.UseSerilog((context, configuration) =>
+    configuration.ReadFrom.Configuration(context.Configuration));
 
 var services = builder.Services;
 
@@ -30,7 +34,8 @@ services.AddSingleton<WebSocketRouter>(provider =>
 {
     var handlers = provider.GetServices<IWebSocketHandler>();
     var sessionManager = provider.GetRequiredService<ISessionManager>();
-    return new WebSocketRouter(sessionManager,handlers);
+    var logger = provider.GetRequiredService<ILogger<WebSocketRouter>>();
+    return new WebSocketRouter(sessionManager,handlers,logger);
 });
 
 var app = builder.Build();

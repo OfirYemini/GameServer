@@ -21,14 +21,14 @@ public class LoginHandler:IWebSocketHandler
         _gameRepository = gameRepository;
     }
 
-    public async Task<IMessage> HandleMessageAsync(MemoryStream stream)
+    public async Task<IMessage> HandleMessageAsync(string sessionId, MemoryStream stream)
     {
         LoginRequest request = LoginRequest.Parser.ParseFrom(stream);
         Guid deviceId = Guid.Parse(request.DeviceId);
-        bool isNewConnection = await _sessionManager.TryAddAsync(deviceId);
-        if(!isNewConnection) throw new Exception($"device {request.DeviceId} is already connected");
         
         int playerId = await _gameRepository.GetOrAddPlayerAsync(deviceId);
+        _sessionManager.CreateSession(sessionId,new PlayerSession(playerId));
+        
         var response = new LoginResponse(){PlayerId = playerId};
         return response;
     }

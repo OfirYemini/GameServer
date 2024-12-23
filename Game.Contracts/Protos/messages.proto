@@ -9,11 +9,29 @@ message LoginResponse {
 }
 
 message UpdateRequest {
-  string resourceType = 1;
+  ResourceType resourceType = 1;
   int32 resourceValue = 2;
 }
 
-message UpdateResponse {
-  string resourceType = 1;
-  int32 resourceBalance = 2;
+enum ResourceType {
+  Coins=0;
+  Rolls =1;
+}
+
+message UpdateResponse {  
+  int32 newBalance = 1;
+  bool success=2;
+  string errorMessage=3;
+}
+
+message ServerError {
+  string message=1;
+}
+
+message ServerResponse {
+  oneof inner_response {
+    ServerError serverError = 1;
+    UpdateResponse updateResponse = 2;
+    LoginResponse loginResponse= 3;
+  }
 }

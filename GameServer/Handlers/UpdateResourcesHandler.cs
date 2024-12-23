@@ -8,14 +8,19 @@ namespace GameServer.Handlers;
 
 public class UpdateResourcesHandler:IWebSocketHandler
 {
+    private readonly IGameRepository _gameRepository;
     public MessageType MessageType { get; } = MessageType.UpdateRequest;
     public MessageParser Parser { get; } = UpdateRequest.Parser;
-    public UpdateResourcesHandler()
+    public UpdateResourcesHandler(IGameRepository gameRepository)
     {
+        _gameRepository = gameRepository;
     }
     
-    public Task<IMessage> HandleMessageAsync(MemoryStream stream)
+    public async Task<IMessage> HandleMessageAsync(string sessionId,MemoryStream stream)
     {
-        throw new NotImplementedException();
+        UpdateRequest request = UpdateRequest.Parser.ParseFrom(stream);
+        int newBalance = await _gameRepository.UpdateResourceAsync((Common.ResourceType)request.ResourceType, request.ResourceValue);
+        var response = new UpdateResponse(){NewBalance = newBalance,Success = true};
+        return response;
     }
 }

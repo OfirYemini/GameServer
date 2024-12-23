@@ -11,7 +11,7 @@ public class GameRepository:IGameRepository
     {
         _dbContextFactory = dbContextFactory;
     }
-    public async Task<int> GetOrAddPlayerAsync(Guid deviceId)
+    public async Task<int> GetOrAddPlayerAsync(Guid deviceId,int playerId)
     {
         using (var dbContext = _dbContextFactory.CreateDbContext())
         {
@@ -26,9 +26,29 @@ public class GameRepository:IGameRepository
             {
                 DeviceId = deviceId
             };
+            var playerBalance = new PlayerBalance()
+            {
+                PlayerId = playerId,
+                ResourceType = (byte)Common.ResourceType.Coins,
+                ResourceBalance = 0
+            };
 
             dbContext.Players.Add(player);
-
+            
+            // dbContext.PlayersBalances.Add(new PlayerBalance()
+            // {
+            //     PlayerId = playerId,
+            //     ResourceType = (byte)Common.ResourceType.Coins,
+            //     ResourceBalance = 0
+            // });
+            //
+            // dbContext.PlayersBalances.Add(new PlayerBalance()
+            // {
+            //     PlayerId = playerId,
+            //     ResourceType = (byte)Common.ResourceType.Rolls,
+            //     ResourceBalance = 0
+            // });
+            
             try
             {
                 await dbContext.SaveChangesAsync();
@@ -41,6 +61,35 @@ public class GameRepository:IGameRepository
             return player?.PlayerId ?? 0;
         }
     }
+
+    public async Task<int> UpdateResourceAsync(int playerId,Common.ResourceType resourceType, int resourceValue)
+    {
+        int newBalance = 0;
+        using (var dbContext = _dbContextFactory.CreateDbContext())
+        {
+            var playerBalance = await dbContext.PlayersBalances.FindAsync(playerId);
+
+            if (playerBalance == null)
+            {
+                playerBalance = new PlayerBalance()
+                {
+                    PlayerId = playerId,
+                    ResourceType = (byte)resourceType,
+                    ResourceBalance = resourceValue,
+                };
+                dbContext.PlayersBalances.Add(playerBalance);
+            }
+            else
+            {
+                playerBalance.ResourceBalance += resourceValue;
+                dbContext.PlayersBalances.Update(playerBalance);
+            }
+
+            newBalance = playerBalance.ResourceBalance;
+            await dbContext.SaveChangesAsync();
+        }
+        return newBalance;
+    }
 }
 
 public class Player
@@ -49,11 +98,19 @@ public class Player
     public int PlayerId { get; set; }
 }
 
+public class PlayerBalance
+{
+    public int PlayerId { get; set; }
+    public byte ResourceType { get; set; }
+    public int ResourceBalance { get; set; }
+}
+
 public class GameDbContext : DbContext
 {
     public GameDbContext(DbContextOptions<GameDbContext> options) : base(options) { }
     
     public DbSet<Player> Players { get; set; }
+    public DbSet<PlayerBalance> PlayersBalances { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -67,5 +124,12 @@ public class GameDbContext : DbContext
         
         modelBuilder.Entity<Player>()
             .HasIndex(p => p.PlayerId);
+        
+        modelBuilder.Entity<Player>()
+            .Property(p => p.PlayerId)
+            .HasAnnotation("SqlServer:Identity", "10000, 1");
+        
+        modelBuilder.Entity<PlayerBalance>()
+            .HasKey(p => p.PlayerId);
     }
 }

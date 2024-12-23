@@ -6,5 +6,3 @@ public enum ResourceType
     Rolls = 1,
 }
 
-public record UpdateResourceRequest(ResourceType ResourceType);
-public record UpdateResourceResponse(int PlayerBalance);

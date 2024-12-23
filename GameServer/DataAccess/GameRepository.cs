@@ -100,7 +100,8 @@ public class GameRepository:IGameRepository
             var toPlayerBalance = playerBalances.FirstOrDefault(pb => pb.PlayerId == toPlayer);
             
             ValidateTransfer(fromPlayer, toPlayer, resourceValue, fromPlayerBalance, toPlayerBalance);
-
+            //todo: impotant handle concurenncy
+            var originalFromBalance = fromPlayerBalance.ResourceBalance;
             fromPlayerBalance!.ResourceBalance -= resourceValue;
             toPlayerBalance!.ResourceBalance += resourceValue;
             

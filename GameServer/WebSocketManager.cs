@@ -85,6 +85,7 @@ public class WebSocketManager:IDisposable
             }
             catch (Exception e)
             {
+                //todo: add error here
                 _logger.LogError(e,"Websocket error for connection {connectionId}",connectionId);
             }
         }

@@ -23,7 +23,8 @@ builder.Host.UseSerilog((context, configuration) =>
 var services = builder.Services;
 
 services.AddDbContextFactory<GameDbContext>(options =>
-    options.UseInMemoryDatabase("GameServerDb"));
+    options.UseSqlite("Data Source=GameServerDb.db"));
+
 
 services.AddSingleton<IWebSocketHandler, LoginHandler>();
 services.AddSingleton<IWebSocketHandler, UpdateResourcesHandler>();

@@ -59,30 +59,83 @@ public class GameRepository:IGameRepository
     public async Task<int> UpdateResourceAsync(int playerId,Common.ResourceType resourceType, int resourceValue)
     {
         int newBalance = 0;
-        using (var dbContext = _dbContextFactory.CreateDbContext())
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+        
+        var playerBalance = await dbContext.PlayersBalances.FindAsync(playerId);
+
+        if (playerBalance == null)
         {
-            var playerBalance = await dbContext.PlayersBalances.FindAsync(playerId);
-
-            if (playerBalance == null)
+            playerBalance = new PlayerBalance()
             {
-                playerBalance = new PlayerBalance()
-                {
-                    PlayerId = playerId,
-                    ResourceType = (byte)resourceType,
-                    ResourceBalance = resourceValue,
-                };
-                dbContext.PlayersBalances.Add(playerBalance);
-            }
-            else
-            {
-                playerBalance.ResourceBalance += resourceValue;
-                dbContext.PlayersBalances.Update(playerBalance);
-            }
-
-            newBalance = playerBalance.ResourceBalance;
-            await dbContext.SaveChangesAsync();
+                PlayerId = playerId,
+                ResourceType = (byte)resourceType,
+                ResourceBalance = resourceValue,
+            };
+            dbContext.PlayersBalances.Add(playerBalance);
         }
+        else
+        {
+            playerBalance.ResourceBalance += resourceValue;
+            dbContext.PlayersBalances.Update(playerBalance);
+        }
+
+        newBalance = playerBalance.ResourceBalance;
+        await dbContext.SaveChangesAsync();
         return newBalance;
+    }
+
+    public async Task<int> TransferResource(int fromPlayer, int toPlayer, Common.ResourceType resourceType, int resourceValue)
+    {
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var transaction = await dbContext.Database.BeginTransactionAsync();
+
+        try
+        {
+            var playerBalances = await dbContext.PlayersBalances
+                .Where(pb => (pb.PlayerId == fromPlayer || pb.PlayerId == toPlayer) 
+                          && pb.ResourceType == (byte)resourceType)
+                .ToListAsync();
+
+            var fromPlayerBalance = playerBalances.FirstOrDefault(pb => pb.PlayerId == fromPlayer);
+            var toPlayerBalance = playerBalances.FirstOrDefault(pb => pb.PlayerId == toPlayer);
+            
+            ValidateTransfer(fromPlayer, toPlayer, resourceValue, fromPlayerBalance, toPlayerBalance);
+
+            fromPlayerBalance!.ResourceBalance -= resourceValue;
+            toPlayerBalance!.ResourceBalance += resourceValue;
+            
+            dbContext.PlayersBalances.Update(fromPlayerBalance);
+            dbContext.PlayersBalances.Update(toPlayerBalance);
+            
+            await dbContext.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            return toPlayerBalance.ResourceBalance;
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            throw new InvalidOperationException("Resource transfer failed.", ex);
+        }
+    }
+
+    private static void ValidateTransfer(int fromPlayer, int toPlayer, int resourceValue, PlayerBalance? fromPlayerBalance,
+        PlayerBalance? toPlayerBalance)
+    {
+        if (fromPlayerBalance == null)
+        {
+            throw new InvalidOperationException($"Player with id {fromPlayer} was not found.");
+        }
+            
+        if (toPlayerBalance == null)
+        {
+            throw new InvalidOperationException($"Target player with id {toPlayer} was not found.");
+        }
+            
+        if (fromPlayerBalance.ResourceBalance < resourceValue)
+        {
+            throw new InvalidOperationException($"Insufficient balance {fromPlayerBalance.ResourceBalance} for player {fromPlayer}.");
+        }
     }
 }
 

@@ -13,16 +13,26 @@ message UpdateRequest {
   int32 resourceValue = 2;
 }
 
+message SendGiftRequest {
+  int32 friendPlayerId = 1;
+  ResourceType resourceType = 2;
+  int32 resourceValue = 3;
+}
+
 enum ResourceType {
   Coins=0;
   Rolls =1;
 }
 
+message SendGiftResponse {
+  int32 newBalance = 1;
+}
+
 message UpdateResponse {  
   int32 newBalance = 1;
-  bool success=2;
-  string errorMessage=3;
 }
+
+
 
 message ServerError {
   string message=1;
@@ -33,5 +43,6 @@ message ServerResponse {
     ServerError serverError = 1;
     UpdateResponse updateResponse = 2;
     LoginResponse loginResponse= 3;
+    SendGiftResponse sendGiftResponse= 4;
   }
 }

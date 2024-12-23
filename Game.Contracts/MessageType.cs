@@ -4,5 +4,6 @@ public enum MessageType:byte
 {
     LoginRequest = 1,
     LoginResponse = 2,
-    UpdateRequest = 3
+    UpdateRequest = 3,
+    SendGift = 4,
 }

@@ -20,7 +20,7 @@ public class UpdateResourcesHandler:IWebSocketHandler
     {
         UpdateRequest request = UpdateRequest.Parser.ParseFrom(stream);
         int newBalance = await _gameRepository.UpdateResourceAsync(session.PlayerId,(Common.ResourceType)request.ResourceType, request.ResourceValue);
-        var response = new UpdateResponse(){NewBalance = newBalance,Success = true};
+        var response = new UpdateResponse(){NewBalance = newBalance};
         var serverResponse = new ServerResponse()
         {
             UpdateResponse = response

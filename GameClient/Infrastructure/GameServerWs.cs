@@ -1,32 +1,31 @@
 ﻿using System.Net.WebSockets;
-using System.Text;
-using Game.Contracts;
-using GameClient.Domain;
 using Google.Protobuf;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace GameClient.Infrastructure;
 
-public class WebSocketBackgroundService : IWebSocketBackgroundService ,IDisposable
+using Game.Contracts;
+using GameClient.Domain;
+using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
+public class GameServerWs : IGameServerWs,IDisposable
 {
+    public event Action<ServerResponse>? OnMessageReceived;
     private readonly IConfiguration _config;
-    private readonly ILogger<WebSocketBackgroundService> _logger;
-    private ClientWebSocket _webSocket;
+    private readonly ILogger<GameServerWs> _logger;
+    private readonly ClientWebSocket _webSocket;
     private readonly CancellationTokenSource _cts;
     private Task _receiveLoopTask;
 
-    public WebSocketBackgroundService(IConfiguration config, ILogger<WebSocketBackgroundService> logger)
+    public GameServerWs(IConfiguration config,ILogger<GameServerWs> logger)
     {
         _config = config;
         _logger = logger;
         _webSocket = new ClientWebSocket();
         _cts = new CancellationTokenSource();
-        
         StartReceiveLoop();
     }
-
+    
     private void StartReceiveLoop()
     {
         _receiveLoopTask = Task.Run(async () =>
@@ -57,7 +56,8 @@ public class WebSocketBackgroundService : IWebSocketBackgroundService ,IDisposab
                     else
                     {
                         using var stream = new MemoryStream(buffer, 0, result.Count);
-                        PrintMessage(stream);
+                        ServerResponse serverResponse = ServerResponse.Parser.ParseFrom(stream);
+                        DispatchMessage(serverResponse);
                     }
                 }
             }
@@ -73,32 +73,35 @@ public class WebSocketBackgroundService : IWebSocketBackgroundService ,IDisposab
         }, _cts.Token);
     }
 
-    private void PrintMessage(MemoryStream stream)
+    public async Task LoginAsync(string deviceId)
     {
-         ServerResponse serverResponse = ServerResponse.Parser.ParseFrom(stream);
-         
-         // Deserialize based on expected response type
-         if (serverResponse.InnerResponseCase == ServerResponse.InnerResponseOneofCase.LoginResponse)
-         {
-             var response = serverResponse.LoginResponse;
-             Console.WriteLine($"LoginResponse: PlayerId={response.PlayerId}");
-         }
-         else if (serverResponse.InnerResponseCase == ServerResponse.InnerResponseOneofCase.UpdateResponse)
-         {
-             var response = serverResponse.UpdateResponse;
-             Console.WriteLine($"UpdateResponse: New Balance={response.NewBalance}");
-         }
-         else if (serverResponse.InnerResponseCase == ServerResponse.InnerResponseOneofCase.ServerError)
-         {
-             var response = serverResponse.ServerError;
-             Console.WriteLine($"Unexpected error received. {response.Message}");
-         }
-         else
-         {
-             Console.WriteLine("Unexpected response received.");
-         }
+        var message = new LoginRequest()
+        {
+            DeviceId = deviceId,
+        };
+        await SendMessageAsync(MessageType.LoginRequest, message);
     }
 
+    public async Task UpdateResourceAsync(ResourceType resourceType, int resourceValue)
+    {
+        var message = new UpdateRequest()
+        {
+            ResourceType = resourceType,
+            ResourceValue = resourceValue
+        };
+        await SendMessageAsync(MessageType.UpdateRequest, message);
+    }
+
+    public async Task SendGiftAsync(int toPlayerId,ResourceType resourceType, int resourceValue)
+    {
+        var message = new SendGiftRequest()
+        {
+            FriendPlayerId = toPlayerId,
+            ResourceType = resourceType,
+            ResourceValue = resourceValue
+        };
+        await SendMessageAsync(MessageType.SendGift, message);
+    }
 
     public async Task SendMessageAsync(MessageType messageType, IMessage message)
     {
@@ -118,7 +121,15 @@ public class WebSocketBackgroundService : IWebSocketBackgroundService ,IDisposab
         );
 
     }
-
+    
+    private void DispatchMessage(ServerResponse serverResponse)
+    {
+        if (OnMessageReceived != null)
+        {
+            OnMessageRecieved(serverResponse);
+        }
+    }
+    
     public void Dispose()
     {
         _webSocket.Dispose();
@@ -126,4 +137,3 @@ public class WebSocketBackgroundService : IWebSocketBackgroundService ,IDisposab
         _receiveLoopTask.Dispose();
     }
 }
-

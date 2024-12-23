@@ -22,8 +22,7 @@ var host = Host.CreateDefaultBuilder(args)
     })
     .ConfigureServices((context, services) =>
     {
-        services.AddSingleton<IWebSocketBackgroundService,WebSocketBackgroundService>();
-        services.AddSingleton<IGameServerWs, GameClientService>();
+        services.AddSingleton<IGameServerWs, GameServerWs>();
         services.AddHostedService<ConsoleMenu>();
     })
     .Build();

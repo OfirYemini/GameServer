@@ -12,6 +12,31 @@ public class ConsoleMenu: BackgroundService
     {
         _client = client;
         _logger = logger;
+
+        _client.OnMessageReceived += PrintMessage;
+    }
+
+    private void PrintMessage(ServerResponse serverResponse)
+    {
+        if (serverResponse.InnerResponseCase == ServerResponse.InnerResponseOneofCase.LoginResponse)
+        {
+            var response = serverResponse.LoginResponse;
+            Console.WriteLine($"LoginResponse: PlayerId={response.PlayerId}");
+        }
+        else if (serverResponse.InnerResponseCase == ServerResponse.InnerResponseOneofCase.UpdateResponse)
+        {
+            var response = serverResponse.UpdateResponse;
+            Console.WriteLine($"UpdateResponse: New Balance={response.NewBalance}");
+        }
+        else if (serverResponse.InnerResponseCase == ServerResponse.InnerResponseOneofCase.ServerError)
+        {
+            var response = serverResponse.ServerError;
+            Console.WriteLine($"Unexpected error received. {response.Message}");
+        }
+        else
+        {
+            Console.WriteLine("Unexpected response received.");
+        }
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)

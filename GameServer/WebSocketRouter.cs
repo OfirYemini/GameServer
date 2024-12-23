@@ -44,13 +44,7 @@ public class WebSocketRouter
             var messageType = (MessageType)inputstream.ReadByte();
             if (playerSession == null && messageType != MessageType.LoginRequest)
             {
-                serverResponse = new ServerResponse()
-                {
-                    ServerError = new ServerError()
-                    {
-                        Message = "player is not authenticated",
-                    },
-                };
+                serverResponse = CreateServerError("player is not authenticated");
                 _logger.LogError("Unauthenticated request was attempted with connection {connectionId}",sessionId);
             }
             else if (playerSession == null)
@@ -64,13 +58,7 @@ public class WebSocketRouter
             }
             else
             {
-                serverResponse = new ServerResponse()
-                {
-                    ServerError = new ServerError()
-                    {
-                        Message = "message type is invalid",
-                    },
-                };
+                serverResponse = CreateServerError("message type is invalid");
                 _logger.LogError("Invalid request with message type {messageType} was attempted for session {connectionId}",messageType,sessionId);
             }
             serverResponse.WriteTo(outputStream);
@@ -97,8 +85,14 @@ public class WebSocketRouter
         // }
     }
 
-    
-    
-    
-    
+    private static IMessage CreateServerError(string message)
+    {
+        return new ServerResponse()
+        {
+            ServerError = new ServerError()
+            {
+                Message = message,
+            },
+        };
+    }
 }

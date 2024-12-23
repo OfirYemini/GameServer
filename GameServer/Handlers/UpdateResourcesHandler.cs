@@ -16,10 +16,10 @@ public class UpdateResourcesHandler:IWebSocketHandler
         _gameRepository = gameRepository;
     }
     
-    public async Task<IMessage> HandleMessageAsync(PlayerSession session,MemoryStream stream)
+    public async Task<IMessage> HandleMessageAsync(PlayerInfo info,MemoryStream stream)
     {
         UpdateRequest request = UpdateRequest.Parser.ParseFrom(stream);
-        int newBalance = await _gameRepository.UpdateResourceAsync(session.PlayerId,(Common.ResourceType)request.ResourceType, request.ResourceValue);
+        int newBalance = await _gameRepository.UpdateResourceAsync(info.PlayerId,(Common.ResourceType)request.ResourceType, request.ResourceValue);
         var response = new UpdateResponse(){NewBalance = newBalance};
         var serverResponse = new ServerResponse()
         {

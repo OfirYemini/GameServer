@@ -5,6 +5,7 @@ using GameServer.DataAccess;
 using GameServer.Handlers;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using WebSocketManager = GameServer.WebSocketManager;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,16 +27,16 @@ services.AddDbContextFactory<GameDbContext>(options =>
 
 services.AddSingleton<IWebSocketHandler, LoginHandler>();
 services.AddSingleton<IWebSocketHandler, UpdateResourcesHandler>();
-services.AddSingleton<ISessionManager, SessionManager>();
+//services.AddSingleton<ISessionManager, SessionManager>();
 services.AddSingleton<IGameRepository, GameRepository>();
 services.AddSingleton<IWebSocketMessageSerializer, WebSocketMessageSerializer>();
 
-services.AddSingleton<WebSocketRouter>(provider =>
+services.AddSingleton<WebSocketManager>(provider =>
 {
     var handlers = provider.GetServices<IWebSocketHandler>();
-    var sessionManager = provider.GetRequiredService<ISessionManager>();
-    var logger = provider.GetRequiredService<ILogger<WebSocketRouter>>();
-    return new WebSocketRouter(sessionManager,handlers,logger);
+    //var sessionManager = provider.GetRequiredService<ISessionManager>();
+    var logger = provider.GetRequiredService<ILogger<WebSocketManager>>();
+    return new WebSocketManager(handlers,logger);
 });
 
 var app = builder.Build();
@@ -45,13 +46,13 @@ app.Use(async (HttpContext context,RequestDelegate next) =>
 {
     if (context.WebSockets.IsWebSocketRequest)
     {
-        var webSocketRouter = context.RequestServices.GetRequiredService<WebSocketRouter>();
+        var webSocketRouter = context.RequestServices.GetRequiredService<WebSocketManager>();
         using var webSocket = await context.WebSockets.AcceptWebSocketAsync();//todo: should I use var cancellationToken = context.RequestAborted;
         var deviceId = context.Request.Query["deviceId"];
         try
         {
             
-            await webSocketRouter.RouteAsync(context, webSocket);    
+            await webSocketRouter.HandleWebSocketSessionAsync(context, webSocket);    
             
         }
         catch (Exception e)

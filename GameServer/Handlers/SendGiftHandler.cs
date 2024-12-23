@@ -6,7 +6,7 @@ namespace GameServer.Handlers;
 
 public interface INotificationManager
 {
-    void SendMessage(int targetPlayerId,IMessage message);
+    Task SendMessageAsync(int targetPlayerId, IMessage message);
 }
 
 public class SendGiftHandler:IWebSocketHandler
@@ -20,15 +20,15 @@ public class SendGiftHandler:IWebSocketHandler
         _gameRepository = gameRepository;
         _notificationManager = notificationManager;
     }
-    public async Task<IMessage> HandleMessageAsync(PlayerSession session, MemoryStream stream)
+    public async Task<IMessage> HandleMessageAsync(PlayerInfo info, MemoryStream stream)
     {
         SendGiftRequest request = SendGiftRequest.Parser.ParseFrom(stream);
-        int newBalance = await _gameRepository.TransferResource(session.PlayerId,request.FriendPlayerId, (Common.ResourceType)request.ResourceType, -request.ResourceValue);
+        int newBalance = await _gameRepository.TransferResource(info.PlayerId,request.FriendPlayerId, (Common.ResourceType)request.ResourceType, -request.ResourceValue);
         var response = new SendGiftResponse(){NewBalance = newBalance};
         
-        _notificationManager.SendMessage(request.FriendPlayerId,new GiftEvent()
+        await _notificationManager.SendMessageAsync(request.FriendPlayerId,new GiftEvent()
         {
-            FromPlayer = session.PlayerId,
+            FromPlayer = info.PlayerId,
             ResourceType = request.ResourceType,
             ResourceValue = request.ResourceValue,
         });

@@ -16,5 +16,5 @@ public interface IWebSocketHandler
 {
     MessageType MessageType { get; }
     
-    Task<IMessage> HandleMessageAsync(PlayerSession session,MemoryStream stream);
+    Task<IMessage> HandleMessageAsync(PlayerInfo info,MemoryStream stream);
 }

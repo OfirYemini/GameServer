@@ -5,12 +5,12 @@ namespace GameServer.Common;
 
 public interface ISessionManager
 {
-    PlayerSession? GetSession(string sessionId);
-    void AddSession(string sessionId, PlayerSession session);
+    PlayerInfo? GetSession(string sessionId);
+    void AddSession(string sessionId, PlayerInfo info);
     bool RemoveSession(string sessionId);
 }
 
-public record PlayerSession(string SessionId)
+public record PlayerInfo(string SessionId)
 {
     public string SessionId { get; } = SessionId;
     public int PlayerId { get; set; } 
@@ -19,25 +19,25 @@ public record PlayerSession(string SessionId)
 public class SessionManager : ISessionManager//todo: implemet as redis
 {
     private readonly ILogger<SessionManager> _logger;
-    private readonly ConcurrentDictionary<string,PlayerSession> _sessions = new ConcurrentDictionary<string,PlayerSession>();
+    private readonly ConcurrentDictionary<string,PlayerInfo> _sessions = new ConcurrentDictionary<string,PlayerInfo>();
 
     public SessionManager(ILogger<SessionManager> logger)
     {
         _logger = logger;
     }
-    public PlayerSession? GetSession(string sessionId)
+    public PlayerInfo? GetSession(string sessionId)
     {
-        _sessions.TryGetValue(sessionId, out PlayerSession? session);
+        _sessions.TryGetValue(sessionId, out PlayerInfo? session);
         return session;
     }
 
-    public void AddSession(string sessionId, PlayerSession session)
+    public void AddSession(string sessionId, PlayerInfo info)
     {
         if(_sessions.TryGetValue(sessionId, out _))
         {
-            throw new Exception($"player {session.PlayerId} is already connected");
+            throw new Exception($"player {info.PlayerId} is already connected");
         }
-        _sessions[sessionId] = session;
+        _sessions[sessionId] = info;
     }
 
     public bool RemoveSession(string sessionId)

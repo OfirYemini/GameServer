@@ -10,25 +10,21 @@ namespace GameServer.Handlers;
 
 public class LoginHandler:IWebSocketHandler
 {
-    private readonly ISessionManager _sessionManager;
     private readonly IGameRepository _gameRepository;
     public MessageType MessageType { get; } = MessageType.LoginRequest;
     
-    public LoginHandler(ISessionManager sessionManager,IGameRepository gameRepository)
-        
+    public LoginHandler(IGameRepository gameRepository)
     {
-        _sessionManager = sessionManager;
         _gameRepository = gameRepository;
     }
 
-    public async Task<IMessage> HandleMessageAsync(PlayerSession session, MemoryStream stream)
+    public async Task<IMessage> HandleMessageAsync(PlayerInfo info, MemoryStream stream)
     {
         LoginRequest request = LoginRequest.Parser.ParseFrom(stream);
         Guid deviceId = Guid.Parse(request.DeviceId);
         
         int playerId = await _gameRepository.GetOrAddPlayerAsync(deviceId);
-        session.PlayerId = playerId;
-        _sessionManager.AddSession(session.SessionId,session);
+        info.PlayerId = playerId;
         
         var response = new ServerResponse()
         {

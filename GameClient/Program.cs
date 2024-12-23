@@ -1,5 +1,18 @@
 ﻿
 
+using GameClient;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+//
+// var host = Host.CreateDefaultBuilder(args)
+//     .ConfigureServices(services =>
+//     {
+//         services.AddHostedService<WebSocketClientService>();
+//     })
+//     .Build();
+//
+// await host.RunAsync();
+
 var client = new WebSocketClient("ws://localhost:5214/ws");
 
 await client.ConnectAsync();

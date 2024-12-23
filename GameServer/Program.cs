@@ -27,16 +27,16 @@ services.AddDbContextFactory<GameDbContext>(options =>
 
 services.AddSingleton<IWebSocketHandler, LoginHandler>();
 services.AddSingleton<IWebSocketHandler, UpdateResourcesHandler>();
-//services.AddSingleton<ISessionManager, SessionManager>();
+services.AddSingleton<INotificationManager, NotificationManager>();
 services.AddSingleton<IGameRepository, GameRepository>();
 services.AddSingleton<IWebSocketMessageSerializer, WebSocketMessageSerializer>();
 
 services.AddSingleton<WebSocketManager>(provider =>
 {
     var handlers = provider.GetServices<IWebSocketHandler>();
-    //var sessionManager = provider.GetRequiredService<ISessionManager>();
+    var notificationManager = provider.GetRequiredService<INotificationManager>();
     var logger = provider.GetRequiredService<ILogger<WebSocketManager>>();
-    return new WebSocketManager(handlers,logger);
+    return new WebSocketManager(handlers,notificationManager,logger);
 });
 
 var app = builder.Build();

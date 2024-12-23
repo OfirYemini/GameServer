@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using Game.Contracts;
 using GameServer.Common;
+using GameServer.Handlers;
 using Google.Protobuf;
 using Google.Protobuf.Reflection;
 using Google.Protobuf.WellKnownTypes;
@@ -13,17 +14,38 @@ using PlayerInfo = GameServer.Common.PlayerInfo;
 
 namespace GameServer;
 
-public class WebSocketManager
+public class WebSocketManager:IDisposable
 {
     private readonly ILogger<WebSocketManager> _logger;
+    private readonly INotificationManager _notificationManager;
     private readonly Dictionary<MessageType,IWebSocketHandler> _handlers;
-    private readonly ConcurrentDictionary<int, (WebSocket,PlayerInfo)> _sessions = new();
-    public WebSocketManager(IEnumerable<IWebSocketHandler> handlers,ILogger<WebSocketManager> logger)
+    private readonly ConcurrentDictionary<int, (WebSocket webSocket, PlayerInfo playerInfo)> _sessions = new();
+
+    public WebSocketManager(IEnumerable<IWebSocketHandler> handlers,INotificationManager notificationManager,ILogger<WebSocketManager> logger)
     {
         _logger = logger;
+        _notificationManager = notificationManager;
         _handlers = handlers.ToDictionary(k=>k.MessageType, v => v);
+        
+        _notificationManager.OnMessageRecieved += OnMessageRecieved;
     }
     
+    private async Task OnMessageRecieved(int targetId, IMessage message)
+    {
+        try
+        {
+            if (_sessions.TryGetValue(targetId, out var session) && session.webSocket.State == WebSocketState.Open)
+            {
+                await SendMessageAsync(session.webSocket, message);
+                return;
+            }
+            _logger.LogInformation($"No active session for {targetId}, notification message discarded");
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "An error occured while sending notification message to player {playerId}",targetId);
+        }
+    }
     public async Task HandleWebSocketSessionAsync(HttpContext context, WebSocket webSocket)
     {
         var buffer = new byte[1024 * 4];
@@ -128,5 +150,10 @@ public class WebSocketManager
                 Message = message,
             },
         };
+    }
+
+    public void Dispose()
+    {
+        _notificationManager.OnMessageRecieved -= OnMessageRecieved;
     }
 }

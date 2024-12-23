@@ -6,6 +6,7 @@ namespace GameServer.Handlers;
 
 public interface INotificationManager
 {
+    event Func<int, IMessage, Task> OnMessageRecieved;
     Task SendMessageAsync(int targetPlayerId, IMessage message);
 }
 
@@ -19,7 +20,10 @@ public class SendGiftHandler:IWebSocketHandler
     {
         _gameRepository = gameRepository;
         _notificationManager = notificationManager;
+        
     }
+    
+
     public async Task<IMessage> HandleMessageAsync(PlayerInfo info, MemoryStream stream)
     {
         SendGiftRequest request = SendGiftRequest.Parser.ParseFrom(stream);

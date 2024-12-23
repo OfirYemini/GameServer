@@ -29,7 +29,8 @@ services.AddSingleton<IWebSocketMessageSerializer, WebSocketMessageSerializer>()
 services.AddSingleton<WebSocketRouter>(provider =>
 {
     var handlers = provider.GetServices<IWebSocketHandler>();
-    return new WebSocketRouter(handlers);
+    var sessionManager = provider.GetRequiredService<ISessionManager>();
+    return new WebSocketRouter(sessionManager,handlers);
 });
 
 var app = builder.Build();

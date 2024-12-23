@@ -21,15 +21,19 @@ public class LoginHandler:IWebSocketHandler
         _gameRepository = gameRepository;
     }
 
-    public async Task<IMessage> HandleMessageAsync(string sessionId, MemoryStream stream)
+    public async Task<IMessage> HandleMessageAsync(PlayerSession session, MemoryStream stream)
     {
         LoginRequest request = LoginRequest.Parser.ParseFrom(stream);
         Guid deviceId = Guid.Parse(request.DeviceId);
         
         int playerId = await _gameRepository.GetOrAddPlayerAsync(deviceId);
-        _sessionManager.CreateSession(sessionId,new PlayerSession(playerId));
+        session.PlayerId = playerId;
+        _sessionManager.AddSession(session.SessionId,session);
         
-        var response = new LoginResponse(){PlayerId = playerId};
+        var response = new ServerResponse()
+        {
+            LoginResponse = new LoginResponse(){PlayerId = playerId }
+        };
         return response;
     }
 }

@@ -6,11 +6,15 @@ namespace GameServer.Common;
 public interface ISessionManager
 {
     PlayerSession? GetSession(string sessionId);
-    void CreateSession(string sessionId, PlayerSession session);
-    Task<bool> TryRemoveAsync(Guid deviceId);
+    void AddSession(string sessionId, PlayerSession session);
+    bool RemoveSession(string sessionId);
 }
 
-public record PlayerSession(int PlayerId);
+public record PlayerSession(string SessionId)
+{
+    public string SessionId { get; } = SessionId;
+    public int PlayerId { get; set; } 
+}
 
 public class SessionManager : ISessionManager//todo: implemet as redis
 {
@@ -21,7 +25,7 @@ public class SessionManager : ISessionManager//todo: implemet as redis
         return session;
     }
 
-    public void CreateSession(string sessionId, PlayerSession session)
+    public void AddSession(string sessionId, PlayerSession session)
     {
         if(_sessions.TryGetValue(sessionId, out _))
         {
@@ -30,15 +34,14 @@ public class SessionManager : ISessionManager//todo: implemet as redis
         _sessions[sessionId] = session;
     }
 
-    public async Task<bool> TryAddAsync(Guid deviceId)
+    public bool RemoveSession(string sessionId)
     {
-        await Task.Delay(10);
-        return _sessions.Add(deviceId);
-    }
+        bool isSessionRemoved = _sessions.TryRemove(sessionId, out _);
+        if (!isSessionRemoved)
+        {
+            Console.WriteLine($"session {sessionId} is not connected");
+        }
 
-    public async Task<bool> TryRemoveAsync(Guid deviceId)
-    {
-        await Task.Delay(10);
-        return _sessions.Remove(deviceId);
+        return isSessionRemoved;
     }
 }

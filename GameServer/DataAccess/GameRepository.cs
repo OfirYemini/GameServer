@@ -11,7 +11,7 @@ public class GameRepository:IGameRepository
     {
         _dbContextFactory = dbContextFactory;
     }
-    public async Task<int> GetOrAddPlayerAsync(Guid deviceId,int playerId)
+    public async Task<int> GetOrAddPlayerAsync(Guid deviceId)
     {
         using (var dbContext = _dbContextFactory.CreateDbContext())
         {
@@ -26,13 +26,7 @@ public class GameRepository:IGameRepository
             {
                 DeviceId = deviceId
             };
-            var playerBalance = new PlayerBalance()
-            {
-                PlayerId = playerId,
-                ResourceType = (byte)Common.ResourceType.Coins,
-                ResourceBalance = 0
-            };
-
+            
             dbContext.Players.Add(player);
             
             // dbContext.PlayersBalances.Add(new PlayerBalance()

@@ -30,7 +30,7 @@ public class WebSocketClient
         await SendProtobufMessageAsync(loginRequest, MessageType.LoginRequest);
     }
 
-    public async Task SendUpdateRequestAsync(string resourceType, int value)
+    public async Task SendUpdateRequestAsync(ResourceType resourceType, int value)
     {
         var updateRequest = new UpdateRequest
         {
@@ -71,21 +71,27 @@ public class WebSocketClient
         var result = await _client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
         using var stream = new MemoryStream(buffer, 0, result.Count);
 
+        ServerResponse serverResponse = ServerResponse.Parser.ParseFrom(stream);
+        
         // Deserialize based on expected response type
-        if (_expectedResponseType == typeof(LoginResponse))
+        if (serverResponse.InnerResponseCase == ServerResponse.InnerResponseOneofCase.LoginResponse)
         {
-            var response = LoginResponse.Parser.ParseFrom(stream);
+            var response = serverResponse.LoginResponse;
             Console.WriteLine($"LoginResponse: PlayerId={response.PlayerId}");
         }
-        else if (_expectedResponseType == typeof(UpdateResponse))
+        else if (serverResponse.InnerResponseCase == ServerResponse.InnerResponseOneofCase.UpdateResponse)
         {
-            var response = UpdateResponse.Parser.ParseFrom(stream);
-            Console.WriteLine($"UpdateResponse: New Balance={response.ResourceBalance}");
+            var response = serverResponse.UpdateResponse;
+            Console.WriteLine($"UpdateResponse: New Balance={response.NewBalance}");
+        }
+        else if (serverResponse.InnerResponseCase == ServerResponse.InnerResponseOneofCase.ServerError)
+        {
+            var response = serverResponse.ServerError;
+            Console.WriteLine($"Unexpected error received. {response.Message}");
         }
         else
         {
             Console.WriteLine("Unexpected response received.");
         }
-        
     }
 }

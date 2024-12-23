@@ -35,27 +35,40 @@ public class WebSocketRouter
             
             using var inputstream = new MemoryStream(buffer, 0, result.Count);
             using var outputStream = new MemoryStream();
-            
+            IMessage serverResponse;
             // 1. Read the first byte (message type)
             // Read the first byte as enum
             var messageType = (MessageType)inputstream.ReadByte();
             if (playerSession == null && messageType != MessageType.LoginRequest)
             {
-                ServerError error = new ServerError()
+                serverResponse = new ServerResponse()
                 {
-                    Message = "player is not authenticated",
+                    ServerError = new ServerError()
+                    {
+                        Message = "player is not authenticated",
+                    },
                 };
-                error.WriteTo(outputStream);
             }
-            else if (messageType == MessageType.LoginRequest)
+            else if (playerSession == null)
             {
-                
+                playerSession = new PlayerSession(sessionId);
             }
-            else if (_handlers.TryGetValue(messageType, out var handler))
+            
+            if (_handlers.TryGetValue(messageType, out var handler))
             {
-                var response = await handler.HandleMessageAsync(inputstream);
-                response.WriteTo(outputStream);
+                serverResponse = await handler.HandleMessageAsync(playerSession,inputstream);
             }
+            else
+            {
+                serverResponse = new ServerResponse()
+                {
+                    ServerError = new ServerError()
+                    {
+                        Message = "message type is invalid",
+                    },
+                };
+            }
+            serverResponse.WriteTo(outputStream);
             
             byte[] bytes = outputStream.ToArray();
 

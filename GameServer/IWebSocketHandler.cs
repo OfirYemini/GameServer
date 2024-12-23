@@ -1,5 +1,6 @@
 ﻿using System.Net.WebSockets;
 using Game.Contracts;
+using GameServer.Common;
 using Google.Protobuf;
 using Google.Protobuf.Reflection;
 
@@ -15,5 +16,5 @@ public interface IWebSocketHandler
 {
     MessageType MessageType { get; }
     
-    Task<IMessage> HandleMessageAsync(string sessionId,MemoryStream stream);
+    Task<IMessage> HandleMessageAsync(PlayerSession session,MemoryStream stream);
 }

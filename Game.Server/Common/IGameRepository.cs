@@ -1,4 +1,4 @@
-﻿namespace GameServer.Common;
+﻿namespace Game.Server.Common;
 
 public interface IGameRepository
 {

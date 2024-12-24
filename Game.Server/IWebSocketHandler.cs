@@ -1,10 +1,10 @@
 ﻿using System.Net.WebSockets;
 using Game.Contracts;
-using GameServer.Common;
+using Game.Server.Common;
 using Google.Protobuf;
 using Google.Protobuf.Reflection;
 
-namespace GameServer;
+namespace Game.Server;
 
 // public interface IWebSocketHandler<TRequest, TResponse>
 // {

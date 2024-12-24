@@ -1,8 +1,8 @@
 ﻿using Game.Contracts;
-using GameServer.Common;
+using Game.Server.Common;
 using Google.Protobuf;
 
-namespace GameServer.Handlers;
+namespace Game.Server.Handlers;
 
 public interface INotificationManager
 {

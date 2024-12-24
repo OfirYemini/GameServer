@@ -1,7 +1,7 @@
-﻿using GameServer.Common;
+﻿using Game.Server.Common;
 using Microsoft.EntityFrameworkCore;
 
-namespace GameServer.DataAccess;
+namespace Game.Server.DataAccess;
 
 public class GameRepository:IGameRepository
 {

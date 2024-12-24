@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using Microsoft.Extensions.Primitives;
 
-namespace GameServer.Common;
+namespace Game.Server.Common;
 
 public interface ISessionManager
 {

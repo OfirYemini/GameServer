@@ -4,15 +4,17 @@ using System.Runtime.InteropServices.JavaScript;
 using System.Text;
 using System.Text.Json;
 using Game.Contracts;
-using GameServer.Common;
-using GameServer.Handlers;
+using Game.Server.Handlers;
+using Game.Server.Common;
 using Google.Protobuf;
 using Google.Protobuf.Reflection;
 using Google.Protobuf.WellKnownTypes;
 using Microsoft.AspNetCore.Identity.Data;
-using PlayerInfo = GameServer.Common.PlayerInfo;
+using PlayerInfo = Game.Server.Common.PlayerInfo;
 
-namespace GameServer;
+namespace Game.Server;
+
+using PlayerInfo = Common.PlayerInfo;
 
 public class WebSocketManager:IDisposable
 {

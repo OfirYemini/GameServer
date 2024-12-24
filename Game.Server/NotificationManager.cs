@@ -1,9 +1,9 @@
 ﻿using System.Threading.Channels;
-using GameServer.Common;
-using GameServer.Handlers;
+using Game.Server.Handlers;
+using Game.Server.Common;
 using Google.Protobuf;
 
-namespace GameServer;
+namespace Game.Server;
 
 public class NotificationManager:INotificationManager
 {

@@ -1,6 +1,6 @@
 ﻿using System.Net.WebSockets;
 
-namespace GameServer;
+namespace Game.Server;
 
 using System.Text;
 using System.Text.Json;

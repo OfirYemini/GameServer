@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace GameServer.DataAccess;
+namespace Game.Server.DataAccess;
 
 public class GameDbContext : DbContext
 {

@@ -7,157 +7,157 @@ using PlayerInfo = GameServer.Core.Entities.PlayerInfo;
 
 namespace GameServer.Infrastructure;
 
-using PlayerInfo = PlayerInfo;
-
-public class WebSocketManager:IDisposable
+public class WebSocketManager : IWebSocketManager,IDisposable
 {
     private readonly ILogger<WebSocketManager> _logger;
     private readonly INotificationManager _notificationManager;
-    private readonly Dictionary<MessageType,ICommandHandler> _handlers;
-    private readonly ConcurrentDictionary<int, (WebSocket webSocket, PlayerInfo playerInfo)> _sessions = new();
+    private readonly Dictionary<MessageType, ICommandHandler> _handlers;
+    private readonly ConcurrentDictionary<int, (WebSocket webSocket, PlayerInfo playerInfo)> _activeSessions = new();
 
-    public WebSocketManager(IEnumerable<ICommandHandler> handlers,INotificationManager notificationManager,ILogger<WebSocketManager> logger)
+    public WebSocketManager(IEnumerable<ICommandHandler> handlers, INotificationManager notificationManager, ILogger<WebSocketManager> logger)
     {
         _logger = logger;
         _notificationManager = notificationManager;
-        _handlers = handlers.ToDictionary(k=>k.MessageType, v => v);
+        _handlers = handlers.ToDictionary(h => h.MessageType, h => h);
         
-        _notificationManager.OnMessageRecieved += OnMessageRecieved;
-    }
-    
-    private async Task OnMessageRecieved(int targetId, IMessage message)
-    {
-        try
-        {
-            if (_sessions.TryGetValue(targetId, out var session) && session.webSocket.State == WebSocketState.Open)
-            {
-                await SendMessageAsync(session.webSocket, message);
-                return;
-            }
-            _logger.LogInformation($"No active session for {targetId}, notification message discarded");
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "An error occured while sending notification message to player {playerId}",targetId);
-        }
-    }
-    public async Task HandleWebSocketSessionAsync(HttpContext context, WebSocket webSocket)
-    {
-        var buffer = new byte[1024 * 4];
-        string connectionId = context.Connection.Id;
-        PlayerInfo? playerInfo = null;
-        _logger.LogInformation("New websocket connection with id {connectionId} is initiated",connectionId);
-        while (webSocket.State == WebSocketState.Open)
-        {
-            IMessage serverResponse;
-            try
-            {
-                var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-                if (result.MessageType == WebSocketMessageType.Close)
-                {
-                    _logger.LogInformation("Client requested close. Closing WebSocket...");
-                    await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None);
-                    break;
-                }
-                using var inputStream = new MemoryStream(buffer, 0, result.Count);
-                var messageType = (MessageType)inputStream.ReadByte();
-                
-                if (playerInfo == null || messageType == MessageType.LoginRequest)
-                {
-                    var firstMsgResult = await HandleFirstMessageAsync(webSocket,messageType, connectionId, inputStream); 
-                    playerInfo ??= firstMsgResult;
-                    continue;
-                }
-                
-                if (_handlers.TryGetValue(messageType, out var handler))
-                {
-                    serverResponse = await handler.HandleMessageAsync(playerInfo, inputStream);
-                }
-                else
-                {
-                    serverResponse = CreateServerError("message type is invalid");
-                    _logger.LogError(
-                        "Invalid request with message type {messageType} was attempted for session {connectionId}, errorId: {error}",
-                        messageType, connectionId,((ServerResponse)serverResponse).ServerError.ErrorId);
-                }
-            }
-            catch (Exception e)
-            {
-                serverResponse = CreateServerError("An error has occured");
-                _logger.LogError(e,"Websocket error for connection {connectionId} with errorId {error}",connectionId,((ServerResponse)serverResponse).ServerError.ErrorId);
-            }
-            await SendMessageAsync(webSocket, serverResponse);//todo: handle error here
-        }
-        
-        if (playerInfo!=null)
-        {
-            _sessions.TryRemove(playerInfo.PlayerId, out _);    
-        }
+        _notificationManager.OnMessageRecieved += HandleIncomingMessageAsync;
     }
 
-    private async Task<PlayerInfo?> HandleFirstMessageAsync(WebSocket webSocket,MessageType messageType,string connectionId, MemoryStream inputStream)
+    private async Task HandleIncomingMessageAsync(int targetId, IMessage message)
     {
-        IMessage serverResponse;
-        PlayerInfo? playerInfo = null;
-        
-        if (messageType != MessageType.LoginRequest)
+        if (_activeSessions.TryGetValue(targetId, out var session) && session.webSocket.State == WebSocketState.Open)
         {
-            serverResponse = CreateServerError("player is not authenticated");
-            _logger.LogError("Unauthenticated request was attempted with connection {connectionId}",connectionId);    
+            await SendMessageAsync(session.webSocket, message);
         }
         else
         {
-            var newPlayerInfo = new PlayerInfo();
-            serverResponse = await _handlers[MessageType.LoginRequest].HandleMessageAsync(newPlayerInfo, inputStream);
-            var loginResponse = (serverResponse as ServerResponse)?.LoginResponse;
-            if (loginResponse != null)
+            _logger.LogInformation("No active session for {TargetId}, message discarded", targetId);
+        }
+    }
+
+    public async Task HandleWebSocketSessionAsync(HttpContext context, WebSocket webSocket)
+    {
+        var buffer = new byte[4096];
+        var connectionId = context.Connection.Id;
+        _logger.LogInformation("WebSocket connection established: {ConnectionId}", connectionId);
+
+        PlayerInfo? playerInfo = null;
+        
+        while (webSocket.State == WebSocketState.Open && !context.RequestAborted.IsCancellationRequested)
+        {
+            try
             {
-                if (_sessions.TryGetValue(loginResponse.PlayerId, out _))
+                var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), context.RequestAborted);
+
+                if (result.MessageType == WebSocketMessageType.Close)
                 {
-                    serverResponse = CreateServerError($"player {loginResponse.PlayerId} is already connected");
-                    _logger.LogError("player {loginResponse.PlayerId} is already connected, errorId {}", loginResponse.PlayerId, ((ServerResponse)serverResponse).ServerError.ErrorId);
+                    _logger.LogInformation("WebSocket {ConnectionId} closing", connectionId);
+                    break;
                 }
-                else
+
+                using var inputStream = new MemoryStream(buffer, 0, result.Count);
+                var messageType = (MessageType)inputStream.ReadByte();
+
+                if (playerInfo == null || messageType == MessageType.LoginRequest)
                 {
-                    _sessions[loginResponse.PlayerId] = (webSocket,newPlayerInfo);
-                    playerInfo = newPlayerInfo;    
+                    playerInfo = await ProcessLoginRequestAsync(webSocket, messageType, connectionId, inputStream);
+                    continue;
                 }
+
+                await ProcessMessageAsync(playerInfo, messageType, inputStream, connectionId, webSocket);
+            }
+            catch (WebSocketException wse)
+            {
+                _logger.LogError(wse, "WebSocket error for {ConnectionId}", connectionId);
+                break;
+            }
+            catch (Exception ex)
+            {
+                var errorResponse = CreateServerError("An unexpected error occurred");
+                _logger.LogError(ex, "Error processing message for {ConnectionId} - ErrorId {ErrorId}", connectionId, errorResponse.ServerError.ErrorId);
+                await SendMessageAsync(webSocket, errorResponse);
             }
         }
-        await SendMessageAsync(webSocket, serverResponse);
+
+        if (playerInfo != null)
+        {
+            _activeSessions.TryRemove(playerInfo.PlayerId, out _);
+        }
+
+        await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Session closed", CancellationToken.None);
+    }
+
+    private async Task<PlayerInfo?> ProcessLoginRequestAsync(WebSocket webSocket, MessageType messageType, string connectionId, MemoryStream inputStream)
+    {
+        if (messageType != MessageType.LoginRequest)
+        {
+            await SendErrorAsync(webSocket, "Unauthorized access attempt", connectionId);
+            return null;
+        }
+
+        var playerInfo = new PlayerInfo();
+        var serverResponse = await _handlers[MessageType.LoginRequest].HandleMessageAsync(playerInfo, inputStream);
         
+        if (serverResponse is ServerResponse response && response.LoginResponse != null)
+        {
+            var playerId = response.LoginResponse.PlayerId;
+
+            if (_activeSessions.ContainsKey(playerId))
+            {
+                await SendErrorAsync(webSocket, $"Player {playerId} already connected", connectionId);
+                return null;
+            }
+
+            _activeSessions[playerId] = (webSocket, playerInfo);
+        }
+
+        await SendMessageAsync(webSocket, serverResponse);
         return playerInfo;
     }
 
-    private static async Task SendMessageAsync(WebSocket webSocket, IMessage serverResponse)
+    private async Task ProcessMessageAsync(PlayerInfo playerInfo, MessageType messageType, MemoryStream inputStream, string connectionId, WebSocket webSocket)
     {
-        using var outputStream = new MemoryStream();
-        serverResponse.WriteTo(outputStream);
-            
-        byte[] bytes = outputStream.ToArray();
+        if (_handlers.TryGetValue(messageType, out var handler))
+        {
+            var response = await handler.HandleMessageAsync(playerInfo, inputStream);
+            await SendMessageAsync(webSocket, response);
+        }
+        else
+        {
+            await SendErrorAsync(webSocket, "Invalid message type", connectionId);
+        }
+    }
 
-        await webSocket.SendAsync(
-            new ArraySegment<byte>(bytes),
-            WebSocketMessageType.Binary,
-            true,
-            CancellationToken.None
-        );
+    private async Task SendMessageAsync(WebSocket webSocket, IMessage message)
+    {
+        try
+        {
+            using var outputStream = new MemoryStream();
+            message.WriteTo(outputStream);
+            var bytes = outputStream.ToArray();
+
+            await webSocket.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Binary, true, CancellationToken.None);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error sending message");
+        }
+    }
+
+    private async Task SendErrorAsync(WebSocket webSocket, string errorMessage, string connectionId)
+    {
+        var errorResponse = CreateServerError(errorMessage);
+        _logger.LogError("{ErrorMessage} - Connection {ConnectionId} - ErrorId {ErrorId}", errorMessage, connectionId, errorResponse.ServerError.ErrorId);
+        await SendMessageAsync(webSocket, errorResponse);
     }
 
     private static ServerResponse CreateServerError(string message)
     {
-        return new ServerResponse()
-        {
-            ServerError = new ServerError()
-            {
-                ErrorId = Guid.NewGuid().ToString(),
-                Message = message,
-            },
-        };
+        return new ServerResponse { ServerError = new ServerError { ErrorId = Guid.NewGuid().ToString(), Message = message } };
     }
 
     public void Dispose()
     {
-        _notificationManager.OnMessageRecieved -= OnMessageRecieved;
+        _notificationManager.OnMessageRecieved -= HandleIncomingMessageAsync;
     }
 }

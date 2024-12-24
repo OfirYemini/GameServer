@@ -30,9 +30,9 @@ var mappingConfig = new MapperConfiguration(cfg =>
     cfg.AddProfile(new MappingProfile());
 });
 
-IMapper mapper = mappingConfig.CreateMapper();
-
-builder.Services.AddSingleton(mapper);
+// IMapper mapper = mappingConfig.CreateMapper();
+//
+// builder.Services.AddSingleton(mapper);
 
 
 var services = builder.Services;
@@ -57,7 +57,7 @@ services.AddSingleton<INotificationManager, NotificationManager>();
 services.AddSingleton<IGameRepository, GameRepository>();
 services.AddSingleton<IWebSocketMessageSerializer, WebSocketMessageSerializer>();
 
-services.AddSingleton<WebSocketManager>(provider =>
+services.AddSingleton<IWebSocketManager>(provider =>
 {
     var handlers = provider.GetServices<ICommandHandler>();
     var notificationManager = provider.GetRequiredService<INotificationManager>();
@@ -70,42 +70,19 @@ app.UseWebSockets(wsOptions);
 
 app.Use(async (HttpContext context,RequestDelegate next) =>
 {
+    var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
     if (context.WebSockets.IsWebSocketRequest)
     {
-        var webSocketRouter = context.RequestServices.GetRequiredService<WebSocketManager>();
-        using var webSocket = await context.WebSockets.AcceptWebSocketAsync();//todo: should I use var cancellationToken = context.RequestAborted;
-        var deviceId = context.Request.Query["deviceId"];
         try
         {
-            
-            await webSocketRouter.HandleWebSocketSessionAsync(context, webSocket);    
-            
+            var webSocketManager = context.RequestServices.GetRequiredService<IWebSocketManager>();
+            using var webSocket = await context.WebSockets.AcceptWebSocketAsync();
+            await webSocketManager.HandleWebSocketSessionAsync(context, webSocket);
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            logger.LogError(e, "Failed to connect to web socket");
         }
-        finally
-        {
-            // if (!string.IsNullOrEmpty(deviceId))
-            // {
-            //     var sessionManager = context.RequestServices.GetRequiredService<ISessionManager>();
-            //     await sessionManager.TryRemoveAsync(new Guid(deviceId));
-            //     
-            //     Console.WriteLine($"Player with DeviceId {deviceId} disconnected.");
-            // }
-            //
-            //
-            // if (webSocket.State != WebSocketState.Closed)
-            // {
-            //     await webSocket.CloseAsync(
-            //         WebSocketCloseStatus.NormalClosure,
-            //         "Closed by server",
-            //         CancellationToken.None
-            //     );
-            // }
-        }
-        
     }
     else
     {

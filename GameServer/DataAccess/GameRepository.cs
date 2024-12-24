@@ -61,6 +61,7 @@ public class GameRepository:IGameRepository
     {
         int newBalance = 0;
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+        //await using var transaction = await dbContext.Database.BeginTransactionAsync();
         
         var playerBalance = await dbContext.PlayersBalances.FirstOrDefaultAsync(p=>p.PlayerId == playerId && p.ResourceType==(byte)resourceType);
 
@@ -71,7 +72,21 @@ public class GameRepository:IGameRepository
         UpdateBalance(dbContext,playerBalance,resourceValue);
 
         newBalance = playerBalance.ResourceBalance;
-        await dbContext.SaveChangesAsync();
+        try
+        {
+            await dbContext.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            _logger.LogError(ex,"Failed to update resource, concurrency exception");
+            throw;
+        }
+        catch (Exception ex)
+        {
+           // await transaction.RollbackAsync();
+            throw;
+        }
+        
         return newBalance;
     }
 

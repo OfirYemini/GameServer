@@ -20,3 +20,4 @@ todo:
 6. dockerize server and client
 7. validate db schema
 8. handle validations in a clean way
+9. add polly policy

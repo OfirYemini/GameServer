@@ -98,16 +98,6 @@ public class WebSocketManager:IDisposable
         {
             _sessions.TryRemove(playerInfo.PlayerId, out _);    
         }
-        
-        
-        // else if (context.Request.Path == NoPath)
-        // {
-        //     Console.WriteLine("connection inititated");
-        // }
-        // else
-        // {
-        //     context.Response.StatusCode = StatusCodes.Status404NotFound;
-        // }
     }
 
     private async Task<PlayerInfo?> HandleFirstMessageAsync(WebSocket webSocket,MessageType messageType,string connectionId, MemoryStream inputStream)

@@ -23,7 +23,16 @@ builder.Host.UseSerilog((context, configuration) =>
 var services = builder.Services;
 
 services.AddDbContextFactory<GameDbContext>(options =>
-    options.UseSqlite("Data Source=GameServerDb.db"));
+{
+    options.UseSqlite("Data Source=GameServerDb.db");
+    if (builder.Environment.IsDevelopment())
+    {
+        options.EnableSensitiveDataLogging();
+    }
+});
+
+
+
 
 
 services.AddSingleton<IWebSocketHandler, LoginHandler>();

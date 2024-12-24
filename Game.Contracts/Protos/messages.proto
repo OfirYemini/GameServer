@@ -39,7 +39,8 @@ message GiftEvent {
 }
 
 message ServerError {
-  string message=1;
+  string errorId=1;
+  string message=2;
 }
 
 message ServerResponse {

@@ -54,21 +54,26 @@ public class WebSocketManager:IDisposable
         _logger.LogInformation("New websocket connection with id {connectionId} is initiated",connectionId);
         while (webSocket.State == WebSocketState.Open)
         {
+            IMessage serverResponse;
             try
             {
                 var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-
-                using var inputStream = new MemoryStream(buffer, 0, result.Count);
-
-                IMessage serverResponse;
-
-                if (playerInfo == null)
+                if (result.MessageType == WebSocketMessageType.Close)
                 {
-                    playerInfo = await HandleFirstMessageAsync(webSocket, connectionId, inputStream);
+                    _logger.LogInformation("Client requested close. Closing WebSocket...");
+                    await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None);
+                    break;
+                }
+                using var inputStream = new MemoryStream(buffer, 0, result.Count);
+                var messageType = (MessageType)inputStream.ReadByte();
+                
+                if (playerInfo == null || messageType == MessageType.LoginRequest)
+                {
+                    var firstMsgResult = await HandleFirstMessageAsync(webSocket,messageType, connectionId, inputStream); 
+                    playerInfo ??= firstMsgResult;
                     continue;
                 }
-
-                var messageType = (MessageType)inputStream.ReadByte();
+                
                 if (_handlers.TryGetValue(messageType, out var handler))
                 {
                     serverResponse = await handler.HandleMessageAsync(playerInfo, inputStream);
@@ -77,17 +82,16 @@ public class WebSocketManager:IDisposable
                 {
                     serverResponse = CreateServerError("message type is invalid");
                     _logger.LogError(
-                        "Invalid request with message type {messageType} was attempted for session {connectionId}",
-                        messageType, connectionId);
+                        "Invalid request with message type {messageType} was attempted for session {connectionId}, errorId: {error}",
+                        messageType, connectionId,((ServerResponse)serverResponse).ServerError.ErrorId);
                 }
-
-                await SendMessageAsync(webSocket, serverResponse);
             }
             catch (Exception e)
             {
-                //todo: add error here
-                _logger.LogError(e,"Websocket error for connection {connectionId}",connectionId);
+                serverResponse = CreateServerError("An error has occured");
+                _logger.LogError(e,"Websocket error for connection {connectionId} with errorId {error}",connectionId,((ServerResponse)serverResponse).ServerError.ErrorId);
             }
+            await SendMessageAsync(webSocket, serverResponse);
         }
         
         if (playerInfo!=null)
@@ -106,11 +110,10 @@ public class WebSocketManager:IDisposable
         // }
     }
 
-    private async Task<PlayerInfo?> HandleFirstMessageAsync(WebSocket webSocket, string connectionId, MemoryStream inputStream)
+    private async Task<PlayerInfo?> HandleFirstMessageAsync(WebSocket webSocket,MessageType messageType,string connectionId, MemoryStream inputStream)
     {
         IMessage serverResponse;
         PlayerInfo? playerInfo = null;
-        var messageType = (MessageType)inputStream.ReadByte();
         
         if (messageType != MessageType.LoginRequest)
         {
@@ -124,12 +127,16 @@ public class WebSocketManager:IDisposable
             var loginResponse = (serverResponse as ServerResponse)?.LoginResponse;
             if (loginResponse != null)
             {
-                if(_sessions.TryGetValue(loginResponse.PlayerId, out _))
+                if (_sessions.TryGetValue(loginResponse.PlayerId, out _))
                 {
-                    throw new Exception($"player {loginResponse.PlayerId} is already connected");
+                    serverResponse = CreateServerError($"player {loginResponse.PlayerId} is already connected");
+                    _logger.LogError("player {loginResponse.PlayerId} is already connected, errorId {}", loginResponse.PlayerId, ((ServerResponse)serverResponse).ServerError.ErrorId);
                 }
-                _sessions[loginResponse.PlayerId] = (webSocket,newPlayerInfo);
-                playerInfo = newPlayerInfo;
+                else
+                {
+                    _sessions[loginResponse.PlayerId] = (webSocket,newPlayerInfo);
+                    playerInfo = newPlayerInfo;    
+                }
             }
         }
         await SendMessageAsync(webSocket, serverResponse);
@@ -152,12 +159,13 @@ public class WebSocketManager:IDisposable
         );
     }
 
-    private static IMessage CreateServerError(string message)
+    private static ServerResponse CreateServerError(string message)
     {
         return new ServerResponse()
         {
             ServerError = new ServerError()
             {
+                ErrorId = Guid.NewGuid().ToString(),
                 Message = message,
             },
         };

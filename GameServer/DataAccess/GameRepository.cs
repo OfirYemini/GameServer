@@ -6,54 +6,54 @@ namespace GameServer.DataAccess;
 public class GameRepository:IGameRepository
 {
     private readonly IDbContextFactory<GameDbContext> _dbContextFactory;
+    private readonly ILogger<GameRepository> _logger;
 
-    public GameRepository(IDbContextFactory<GameDbContext> dbContextFactory)
+    public GameRepository(IDbContextFactory<GameDbContext> dbContextFactory,ILogger<GameRepository> logger)
     {
         _dbContextFactory = dbContextFactory;
+        _logger = logger;
     }
     public async Task<int> GetOrAddPlayerAsync(Guid deviceId)
     {
-        using (var dbContext = _dbContextFactory.CreateDbContext())
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+        var player = await dbContext.Players.FirstOrDefaultAsync(p=>p.DeviceId == deviceId);
+
+        if (player != null)
         {
-            var player = await dbContext.Players.FirstOrDefaultAsync(p=>p.DeviceId == deviceId);
-
-            if (player != null)
-            {
-                return player.PlayerId;
-            }
-
-            player = new Player
-            {
-                DeviceId = deviceId
-            };
-            
-            dbContext.Players.Add(player);
-            
-            // dbContext.PlayersBalances.Add(new PlayerBalance()
-            // {
-            //     PlayerId = playerId,
-            //     ResourceType = (byte)Common.ResourceType.Coins,
-            //     ResourceBalance = 0
-            // });
-            //
-            // dbContext.PlayersBalances.Add(new PlayerBalance()
-            // {
-            //     PlayerId = playerId,
-            //     ResourceType = (byte)Common.ResourceType.Rolls,
-            //     ResourceBalance = 0
-            // });
-            
-            try
-            {
-                await dbContext.SaveChangesAsync();
-            }
-            catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("UNIQUE") ?? false)//todo: is it required??
-            {
-                player = await dbContext.Players.FindAsync(deviceId);
-            }
-
-            return player?.PlayerId ?? 0;
+            return player.PlayerId;
         }
+
+        player = new Player
+        {
+            DeviceId = deviceId
+        };
+            
+        dbContext.Players.Add(player);
+            
+        // dbContext.PlayersBalances.Add(new PlayerBalance()
+        // {
+        //     PlayerId = playerId,
+        //     ResourceType = (byte)Common.ResourceType.Coins,
+        //     ResourceBalance = 0
+        // });
+        //
+        // dbContext.PlayersBalances.Add(new PlayerBalance()
+        // {
+        //     PlayerId = playerId,
+        //     ResourceType = (byte)Common.ResourceType.Rolls,
+        //     ResourceBalance = 0
+        // });
+            
+        try
+        {
+            await dbContext.SaveChangesAsync();
+        }
+        catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("UNIQUE") ?? false)//todo: is it required??
+        {
+            player = await dbContext.Players.FindAsync(deviceId);
+        }
+
+        return player?.PlayerId ?? 0;
     }
 
     public async Task<int> UpdateResourceAsync(int playerId,Common.ResourceType resourceType, int resourceValue)
@@ -92,26 +92,32 @@ public class GameRepository:IGameRepository
         try
         {
             var playerBalances = await dbContext.PlayersBalances
-                .Where(pb => (pb.PlayerId == fromPlayer || pb.PlayerId == toPlayer) 
-                          && pb.ResourceType == (byte)resourceType)
+                .Where(pb => (pb.PlayerId == fromPlayer || pb.PlayerId == toPlayer)
+                             && pb.ResourceType == (byte)resourceType)
                 .ToListAsync();
 
             var fromPlayerBalance = playerBalances.FirstOrDefault(pb => pb.PlayerId == fromPlayer);
             var toPlayerBalance = playerBalances.FirstOrDefault(pb => pb.PlayerId == toPlayer);
-            
+
             ValidateTransfer(fromPlayer, toPlayer, resourceValue, fromPlayerBalance, toPlayerBalance);
             //todo: impotant handle concurenncy
             var originalFromBalance = fromPlayerBalance.ResourceBalance;
             fromPlayerBalance!.ResourceBalance -= resourceValue;
             toPlayerBalance!.ResourceBalance += resourceValue;
-            
+
             dbContext.PlayersBalances.Update(fromPlayerBalance);
             dbContext.PlayersBalances.Update(toPlayerBalance);
-            
+
             await dbContext.SaveChangesAsync();
             await transaction.CommitAsync();
 
             return toPlayerBalance.ResourceBalance;
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            await transaction.RollbackAsync();
+            _logger.LogError(ex,"Failed to transfer resource, concurrency exception");
+            throw;//todo: clean and maybe retry
         }
         catch (Exception ex)
         {

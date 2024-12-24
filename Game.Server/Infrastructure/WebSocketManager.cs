@@ -1,20 +1,11 @@
 ﻿using System.Collections.Concurrent;
 using System.Net.WebSockets;
-using System.Runtime.InteropServices.JavaScript;
-using System.Text;
-using System.Text.Json;
 using Game.Contracts;
-using Game.Server.Handlers;
-using Game.Server.Common;
-using GameServer.Application.Commands;
 using GameServer.Core.Interfaces;
 using Google.Protobuf;
-using Google.Protobuf.Reflection;
-using Google.Protobuf.WellKnownTypes;
-using Microsoft.AspNetCore.Identity.Data;
 using PlayerInfo = GameServer.Core.Entities.PlayerInfo;
 
-namespace Game.Server;
+namespace GameServer.Infrastructure;
 
 using PlayerInfo = PlayerInfo;
 

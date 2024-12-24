@@ -122,7 +122,7 @@ public class GameRepository:IGameRepository
             await dbContext.SaveChangesAsync();
             await transaction.CommitAsync();
 
-            return toPlayerBalance!.ResourceBalance;
+            return fromPlayerBalance!.ResourceBalance;
         }
         catch (DbUpdateConcurrencyException ex)
         {

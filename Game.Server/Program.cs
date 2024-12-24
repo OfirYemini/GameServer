@@ -10,7 +10,7 @@ using GameServer.Core.Interfaces;
 using GameServer.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
-using WebSocketManager = Game.Server.WebSocketManager;
+using WebSocketManager = GameServer.Infrastructure.WebSocketManager;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,7 +51,7 @@ services.AddDbContextFactory<GameDbContext>(options =>
 
 
 services.AddSingleton<ICommandHandler, LoginHandler>();
-services.AddSingleton<ICommandHandler, UpdateResourcesCommand>();
+services.AddSingleton<ICommandHandler, UpdateResourceCommand>();
 services.AddSingleton<ICommandHandler, SendGiftCommand>();
 services.AddSingleton<INotificationManager, NotificationManager>();
 services.AddSingleton<IGameRepository, GameRepository>();

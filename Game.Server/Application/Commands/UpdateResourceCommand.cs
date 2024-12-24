@@ -7,12 +7,12 @@ using Google.Protobuf;
 
 namespace GameServer.Application.Commands;
 
-public class UpdateResourcesCommand:ICommandHandler
+public class UpdateResourceCommand:ICommandHandler
 {
     private readonly IGameRepository _gameRepository;
     public MessageType MessageType { get; } = MessageType.UpdateRequest;
     public MessageParser Parser { get; } = UpdateRequest.Parser;
-    public UpdateResourcesCommand(IGameRepository gameRepository)
+    public UpdateResourceCommand(IGameRepository gameRepository)
     {
         _gameRepository = gameRepository;
     }

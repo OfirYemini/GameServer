@@ -24,6 +24,10 @@ public class GameDbContext : DbContext
   
         modelBuilder.Entity<PlayerBalance>()
             .HasKey(p => new { p.PlayerId, p.ResourceType });
+        
+        modelBuilder.Entity<PlayerBalance>()
+            .Property(p => p.RowVersion)
+            .IsConcurrencyToken();
 
     }
 }

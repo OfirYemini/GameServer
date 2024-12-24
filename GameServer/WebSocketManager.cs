@@ -91,7 +91,7 @@ public class WebSocketManager:IDisposable
                 serverResponse = CreateServerError("An error has occured");
                 _logger.LogError(e,"Websocket error for connection {connectionId} with errorId {error}",connectionId,((ServerResponse)serverResponse).ServerError.ErrorId);
             }
-            await SendMessageAsync(webSocket, serverResponse);
+            await SendMessageAsync(webSocket, serverResponse);//todo: handle error here
         }
         
         if (playerInfo!=null)

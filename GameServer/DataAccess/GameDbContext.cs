@@ -28,6 +28,9 @@ public class GameDbContext : DbContext
         modelBuilder.Entity<PlayerBalance>()
             .Property(p => p.RowVersion)
             .IsConcurrencyToken();
+        
+        modelBuilder.Entity<PlayerBalance>()
+            .ToTable(b => b.HasCheckConstraint("CK_PlayerBalance_Positive", "ResourceBalance >= 0"));
 
     }
 }

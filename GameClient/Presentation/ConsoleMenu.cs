@@ -28,6 +28,16 @@ public class ConsoleMenu: BackgroundService
             var response = serverResponse.UpdateResponse;
             Console.WriteLine($"UpdateResponse: New Balance={response.NewBalance}");
         }
+        else if (serverResponse.InnerResponseCase == ServerResponse.InnerResponseOneofCase.SendGiftResponse)
+        {
+            var response = serverResponse.SendGiftResponse;
+            Console.WriteLine($"UpdateResponse: New Balance={response.NewBalance}");
+        }
+        else if (serverResponse.InnerResponseCase == ServerResponse.InnerResponseOneofCase.GiftEvent)
+        {
+            var response = serverResponse.GiftEvent;
+            Console.WriteLine($"GiftEvent from player {response.FromPlayer} : ResourceValue={response.ResourceValue} ({response.ResourceType})");
+        }
         else if (serverResponse.InnerResponseCase == ServerResponse.InnerResponseOneofCase.ServerError)
         {
             var response = serverResponse.ServerError;

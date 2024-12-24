@@ -36,6 +36,7 @@ namespace GameServer.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PlayersBalances", x => new { x.PlayerId, x.ResourceType });
+                    table.CheckConstraint("CK_PlayerBalance_Positive", "ResourceBalance >= 0");
                 });
 
             migrationBuilder.CreateIndex(

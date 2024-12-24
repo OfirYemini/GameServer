@@ -50,7 +50,10 @@ namespace GameServer.Migrations
 
                     b.HasKey("PlayerId", "ResourceType");
 
-                    b.ToTable("PlayersBalances");
+                    b.ToTable("PlayersBalances", t =>
+                        {
+                            t.HasCheckConstraint("CK_PlayerBalance_Positive", "ResourceBalance >= 0");
+                        });
                 });
 #pragma warning restore 612, 618
         }

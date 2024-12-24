@@ -22,35 +22,36 @@ public class GameRepository:IGameRepository
         {
             return player.PlayerId;
         }
-
+        
+        await using var transaction = await dbContext.Database.BeginTransactionAsync();
         player = new Player
         {
             DeviceId = deviceId
         };
             
         dbContext.Players.Add(player);
-            
-        // dbContext.PlayersBalances.Add(new PlayerBalance()
-        // {
-        //     PlayerId = playerId,
-        //     ResourceType = (byte)Common.ResourceType.Coins,
-        //     ResourceBalance = 0
-        // });
-        //
-        // dbContext.PlayersBalances.Add(new PlayerBalance()
-        // {
-        //     PlayerId = playerId,
-        //     ResourceType = (byte)Common.ResourceType.Rolls,
-        //     ResourceBalance = 0
-        // });
-            
+        
         try
         {
             await dbContext.SaveChangesAsync();
+            
+            foreach (var resourceType in Enum.GetValues<Common.ResourceType>())
+            {
+                var resourceBalance = new PlayerBalance()
+                {
+                    PlayerId = player.PlayerId,
+                    ResourceType = (byte)resourceType,
+                    ResourceBalance = 0,
+                };
+                dbContext.PlayersBalances.Add(resourceBalance);
+            }
+            await dbContext.SaveChangesAsync();
+            await transaction.CommitAsync();
         }
-        catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("UNIQUE") ?? false)//todo: is it required??
+        catch (Exception e)
         {
-            player = await dbContext.Players.FindAsync(deviceId);
+            await transaction.RollbackAsync();
+            throw;
         }
 
         return player?.PlayerId ?? 0;
@@ -65,23 +66,20 @@ public class GameRepository:IGameRepository
 
         if (playerBalance == null)
         {
-            playerBalance = new PlayerBalance()
-            {
-                PlayerId = playerId,
-                ResourceType = (byte)resourceType,
-                ResourceBalance = resourceValue,
-            };
-            dbContext.PlayersBalances.Add(playerBalance);
+            throw new DbUpdateException($"Player {playerId} does not exist");
         }
-        else
-        {
-            playerBalance.ResourceBalance += resourceValue;
-            dbContext.PlayersBalances.Update(playerBalance);
-        }
+        UpdateBalance(dbContext,playerBalance,resourceValue);
 
         newBalance = playerBalance.ResourceBalance;
         await dbContext.SaveChangesAsync();
         return newBalance;
+    }
+
+    private static void UpdateBalance(GameDbContext dbContext,PlayerBalance playerBalance,int resourceValue)
+    {
+        playerBalance.ResourceBalance += resourceValue;
+        playerBalance.RowVersion += 1;
+        dbContext.PlayersBalances.Update(playerBalance);
     }
 
     public async Task<int> TransferResource(int fromPlayer, int toPlayer, Common.ResourceType resourceType, int resourceValue)
@@ -101,17 +99,13 @@ public class GameRepository:IGameRepository
 
             ValidateTransfer(fromPlayer, toPlayer, resourceValue, fromPlayerBalance, toPlayerBalance);
             //todo: impotant handle concurenncy
-            var originalFromBalance = fromPlayerBalance.ResourceBalance;
-            fromPlayerBalance!.ResourceBalance -= resourceValue;
-            toPlayerBalance!.ResourceBalance += resourceValue;
-
-            dbContext.PlayersBalances.Update(fromPlayerBalance);
-            dbContext.PlayersBalances.Update(toPlayerBalance);
-
+            UpdateBalance(dbContext,fromPlayerBalance!,-1 * resourceValue);
+            UpdateBalance(dbContext,toPlayerBalance!,resourceValue);
+            
             await dbContext.SaveChangesAsync();
             await transaction.CommitAsync();
 
-            return toPlayerBalance.ResourceBalance;
+            return toPlayerBalance!.ResourceBalance;
         }
         catch (DbUpdateConcurrencyException ex)
         {

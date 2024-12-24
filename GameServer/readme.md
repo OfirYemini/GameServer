@@ -18,3 +18,5 @@ todo:
 4. support scaling
 5. add integration tests with test containers
 6. dockerize server and client
+7. validate db schema
+8. handle validations in a clean way

@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GameServer.Migrations
 {
     [DbContext(typeof(GameDbContext))]
-    [Migration("20241224061128_InitialCreate")]
+    [Migration("20241224095040_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -53,7 +53,10 @@ namespace GameServer.Migrations
 
                     b.HasKey("PlayerId", "ResourceType");
 
-                    b.ToTable("PlayersBalances");
+                    b.ToTable("PlayersBalances", t =>
+                        {
+                            t.HasCheckConstraint("CK_PlayerBalance_Positive", "ResourceBalance >= 0");
+                        });
                 });
 #pragma warning restore 612, 618
         }

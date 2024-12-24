@@ -3,6 +3,7 @@ using Game.Server;
 using Game.Server.Common;
 using Game.Server.DataAccess;
 using Game.Server.Handlers;
+using GameServer.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using WebSocketManager = Game.Server.WebSocketManager;

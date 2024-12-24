@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Game.Server.Migrations
+namespace GameServer.Migrations
 {
     [DbContext(typeof(GameDbContext))]
     partial class GameDbContextModelSnapshot : ModelSnapshot
@@ -17,7 +17,7 @@ namespace Game.Server.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.11");
 
-            modelBuilder.Entity("Game.Server.DataAccess.Player", b =>
+            modelBuilder.Entity("GameServer.Infrastructure.Player", b =>
                 {
                     b.Property<int>("PlayerId")
                         .ValueGeneratedOnAdd()
@@ -33,7 +33,7 @@ namespace Game.Server.Migrations
                     b.ToTable("Players");
                 });
 
-            modelBuilder.Entity("Game.Server.DataAccess.PlayerBalance", b =>
+            modelBuilder.Entity("GameServer.Infrastructure.PlayerBalance", b =>
                 {
                     b.Property<int>("PlayerId")
                         .HasColumnType("INTEGER");

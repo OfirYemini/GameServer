@@ -1,7 +1,8 @@
 ﻿using Game.Server.Common;
+using Game.Server.DataAccess;
 using Microsoft.EntityFrameworkCore;
 
-namespace Game.Server.DataAccess;
+namespace GameServer.Infrastructure;
 
 public class GameRepository:IGameRepository
 {
@@ -35,7 +36,7 @@ public class GameRepository:IGameRepository
         {
             await dbContext.SaveChangesAsync();
             
-            foreach (var resourceType in Enum.GetValues<Common.ResourceType>())
+            foreach (var resourceType in Enum.GetValues<Game.Server.Common.ResourceType>())
             {
                 var resourceBalance = new PlayerBalance()
                 {
@@ -57,7 +58,7 @@ public class GameRepository:IGameRepository
         return player?.PlayerId ?? 0;
     }
 
-    public async Task<int> UpdateResourceAsync(int playerId,Common.ResourceType resourceType, int resourceValue)
+    public async Task<int> UpdateResourceAsync(int playerId,Game.Server.Common.ResourceType resourceType, int resourceValue)
     {
         int newBalance = 0;
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -97,7 +98,7 @@ public class GameRepository:IGameRepository
         dbContext.PlayersBalances.Update(playerBalance);
     }
 
-    public async Task<int> TransferResource(int fromPlayer, int toPlayer, Common.ResourceType resourceType, int resourceValue)
+    public async Task<int> TransferResource(int fromPlayer, int toPlayer, Game.Server.Common.ResourceType resourceType, int resourceValue)
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
         await using var transaction = await dbContext.Database.BeginTransactionAsync();
@@ -153,19 +154,4 @@ public class GameRepository:IGameRepository
             throw new InvalidOperationException($"Insufficient balance {fromPlayerBalance.ResourceBalance} for player {fromPlayer}.");
         }
     }
-}
-
-public class Player
-{
-    public Guid DeviceId { get; set; }
-    public int PlayerId { get; set; }
-}
-
-public class PlayerBalance
-{
-    public int PlayerId { get; set; }
-    public byte ResourceType { get; set; }
-    public int ResourceBalance { get; set; }
-    
-    public int RowVersion { get; set; }
 }

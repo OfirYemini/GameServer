@@ -45,7 +45,7 @@ public class ConsoleMenu: BackgroundService
         while (!exit && !stoppingToken.IsCancellationRequested)
         {
             Console.WriteLine("\n-- MAIN MENU --");
-            Console.WriteLine("1) Login (f78681e1-4521-4b39-a3b9-f2e7e51636a7,145bf581-3cc0-4428-add8-fb2300544195,15b1ec0f-389b-40f9-b800-dd4d78275420)");
+            Console.WriteLine("1) Login");
             Console.WriteLine("2) Update Resource");
             Console.WriteLine("3) Send Gift");
             Console.WriteLine("4) Exit");
@@ -76,7 +76,19 @@ public class ConsoleMenu: BackgroundService
 
     private async Task HandleLogin()
     {
-        var deviceId = GetValidInput<string>("DeviceId: ");
+        String[] devices =
+        [
+            "f78681e1-4521-4b39-a3b9-f2e7e51636a7", "145bf581-3cc0-4428-add8-fb2300544195",
+            "15b1ec0f-389b-40f9-b800-dd4d78275420"
+        ];
+        Console.WriteLine($"1. {devices[0]}\t2. {devices[1]}\t3. {devices[2]}\t4.other");
+        var choice = GetValidInput<int>("Your choice (1-4): ");
+        string deviceId = choice switch
+        {
+            1 or 2 or 3 => devices[choice-1],
+            4 => GetValidInput<string>("DeviceId: "),
+            _ => GetValidInput<string>("DeviceId: ")
+        };
         await _client.LoginAsync(deviceId);
     }
 

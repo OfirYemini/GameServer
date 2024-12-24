@@ -6,24 +6,26 @@ using System.Text.Json;
 using Game.Contracts;
 using Game.Server.Handlers;
 using Game.Server.Common;
+using GameServer.Application.Commands;
+using GameServer.Core.Interfaces;
 using Google.Protobuf;
 using Google.Protobuf.Reflection;
 using Google.Protobuf.WellKnownTypes;
 using Microsoft.AspNetCore.Identity.Data;
-using PlayerInfo = Game.Server.Common.PlayerInfo;
+using PlayerInfo = GameServer.Core.Entities.PlayerInfo;
 
 namespace Game.Server;
 
-using PlayerInfo = Common.PlayerInfo;
+using PlayerInfo = PlayerInfo;
 
 public class WebSocketManager:IDisposable
 {
     private readonly ILogger<WebSocketManager> _logger;
     private readonly INotificationManager _notificationManager;
-    private readonly Dictionary<MessageType,IWebSocketHandler> _handlers;
+    private readonly Dictionary<MessageType,ICommandHandler> _handlers;
     private readonly ConcurrentDictionary<int, (WebSocket webSocket, PlayerInfo playerInfo)> _sessions = new();
 
-    public WebSocketManager(IEnumerable<IWebSocketHandler> handlers,INotificationManager notificationManager,ILogger<WebSocketManager> logger)
+    public WebSocketManager(IEnumerable<ICommandHandler> handlers,INotificationManager notificationManager,ILogger<WebSocketManager> logger)
     {
         _logger = logger;
         _notificationManager = notificationManager;

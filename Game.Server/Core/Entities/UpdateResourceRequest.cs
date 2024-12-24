@@ -1,4 +1,4 @@
-﻿namespace Game.Server.Common;
+﻿namespace GameServer.Core.Entities;
 
 public enum ResourceType
 {

@@ -70,7 +70,7 @@ public class GameRepositoryTests:IDisposable, IAsyncDisposable
         {
             //Arrange
             var playerId = 5;
-            var resourceType = Common.ResourceType.Coins;
+            var resourceType = GameServer.Core.Entities.ResourceType.Coins;
             var playerBalance = new PlayerBalance { PlayerId = playerId, ResourceType = (byte)resourceType, ResourceBalance = initialBalance };
             
             _dbContext.PlayersBalances.Add(playerBalance);
@@ -88,7 +88,7 @@ public class GameRepositoryTests:IDisposable, IAsyncDisposable
         {
             //Arrange
             var playerId = 6;
-            var resourceType = Common.ResourceType.Coins;
+            var resourceType = GameServer.Core.Entities.ResourceType.Coins;
             
             //Act & Assert
             await FluentActions.Invoking(() =>
@@ -104,7 +104,7 @@ public class GameRepositoryTests:IDisposable, IAsyncDisposable
             //Arrange
             var fromPlayer = new Player() { PlayerId = 10, DeviceId = Guid.NewGuid() };
             var toPlayer = new Player() { PlayerId = 11, DeviceId = Guid.NewGuid() };
-            var resourceType = Common.ResourceType.Coins;
+            var resourceType = GameServer.Core.Entities.ResourceType.Coins;
             var fromBalance = new PlayerBalance { PlayerId = fromPlayer.PlayerId, ResourceType = (byte)resourceType, ResourceBalance = fromInitial };
             var toBalance = new PlayerBalance { PlayerId = toPlayer.PlayerId, ResourceType = (byte)resourceType, ResourceBalance = toInitial };
             
@@ -125,7 +125,7 @@ public class GameRepositoryTests:IDisposable, IAsyncDisposable
             //Arrange
             var fromPlayer = new Player() { PlayerId = 10, DeviceId = Guid.NewGuid() };
             var toPlayer = new Player() { PlayerId = 11, DeviceId = Guid.NewGuid() };
-            var resourceType = Common.ResourceType.Coins;
+            var resourceType = GameServer.Core.Entities.ResourceType.Coins;
             var fromBalance = new PlayerBalance { PlayerId = fromPlayer.PlayerId, ResourceType = (byte)resourceType, ResourceBalance = 2 };
             var toBalance = new PlayerBalance { PlayerId = toPlayer.PlayerId, ResourceType = (byte)resourceType, ResourceBalance = 10 };
             

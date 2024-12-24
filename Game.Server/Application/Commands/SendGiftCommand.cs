@@ -1,22 +1,19 @@
 ﻿using Game.Contracts;
+using Game.Server;
 using Game.Server.Common;
+using GameServer.Core.Entities;
+using GameServer.Core.Interfaces;
 using Google.Protobuf;
 
-namespace Game.Server.Handlers;
+namespace GameServer.Application.Commands;
 
-public interface INotificationManager
-{
-    event Func<int, IMessage, Task> OnMessageRecieved;
-    Task SendMessageAsync(int targetPlayerId, IMessage message);
-}
-
-public class SendGiftHandler:IWebSocketHandler
+public class SendGiftCommand:ICommandHandler
 {
     private readonly IGameRepository _gameRepository;
     private readonly INotificationManager _notificationManager;
     public MessageType MessageType { get; } = MessageType.SendGift;
     
-    public SendGiftHandler(IGameRepository gameRepository,INotificationManager notificationManager)
+    public SendGiftCommand(IGameRepository gameRepository,INotificationManager notificationManager)
     {
         _gameRepository = gameRepository;
         _notificationManager = notificationManager;
@@ -33,7 +30,7 @@ public class SendGiftHandler:IWebSocketHandler
             return validationErrorMessage;
         }
         
-        int newBalance = await _gameRepository.TransferResource(info.PlayerId,request.FriendPlayerId, (Common.ResourceType)request.ResourceType, request.ResourceValue);
+        int newBalance = await _gameRepository.TransferResource(info.PlayerId,request.FriendPlayerId, (Core.Entities.ResourceType)request.ResourceType, request.ResourceValue);
         var response = new SendGiftResponse(){NewBalance = newBalance};
         
         await NotifyGiftReciever(info, request);

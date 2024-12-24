@@ -1,8 +1,12 @@
 using System.Net.WebSockets;
+using AutoMapper;
 using Game.Server;
 using Game.Server.Common;
 using Game.Server.DataAccess;
 using Game.Server.Handlers;
+using GameServer.Application;
+using GameServer.Application.Commands;
+using GameServer.Core.Interfaces;
 using GameServer.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -21,6 +25,16 @@ WebSocketOptions wsOptions = new WebSocketOptions()
 builder.Host.UseSerilog((context, configuration) =>
     configuration.ReadFrom.Configuration(context.Configuration));
 
+var mappingConfig = new MapperConfiguration(cfg =>
+{
+    cfg.AddProfile(new MappingProfile());
+});
+
+IMapper mapper = mappingConfig.CreateMapper();
+
+builder.Services.AddSingleton(mapper);
+
+
 var services = builder.Services;
 
 services.AddDbContextFactory<GameDbContext>(options =>
@@ -36,16 +50,16 @@ services.AddDbContextFactory<GameDbContext>(options =>
 
 
 
-services.AddSingleton<IWebSocketHandler, LoginHandler>();
-services.AddSingleton<IWebSocketHandler, UpdateResourcesHandler>();
-services.AddSingleton<IWebSocketHandler, SendGiftHandler>();
+services.AddSingleton<ICommandHandler, LoginHandler>();
+services.AddSingleton<ICommandHandler, UpdateResourcesCommand>();
+services.AddSingleton<ICommandHandler, SendGiftCommand>();
 services.AddSingleton<INotificationManager, NotificationManager>();
 services.AddSingleton<IGameRepository, GameRepository>();
 services.AddSingleton<IWebSocketMessageSerializer, WebSocketMessageSerializer>();
 
 services.AddSingleton<WebSocketManager>(provider =>
 {
-    var handlers = provider.GetServices<IWebSocketHandler>();
+    var handlers = provider.GetServices<ICommandHandler>();
     var notificationManager = provider.GetRequiredService<INotificationManager>();
     var logger = provider.GetRequiredService<ILogger<WebSocketManager>>();
     return new WebSocketManager(handlers,notificationManager,logger);

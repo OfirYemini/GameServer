@@ -3,12 +3,14 @@ using System.Text;
 using System.Text.Json;
 using Game.Contracts;
 using Game.Server.Common;
+using GameServer.Core.Entities;
+using GameServer.Core.Interfaces;
 using Google.Protobuf;
 using Google.Protobuf.Reflection;
 
 namespace Game.Server.Handlers;
 
-public class LoginHandler:IWebSocketHandler
+public class LoginHandler:ICommandHandler
 {
     private readonly IGameRepository _gameRepository;
     public MessageType MessageType { get; } = MessageType.LoginRequest;

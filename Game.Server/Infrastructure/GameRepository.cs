@@ -1,5 +1,6 @@
 ﻿using Game.Server.Common;
 using Game.Server.DataAccess;
+using GameServer.Core.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace GameServer.Infrastructure;
@@ -36,7 +37,7 @@ public class GameRepository:IGameRepository
         {
             await dbContext.SaveChangesAsync();
             
-            foreach (var resourceType in Enum.GetValues<Game.Server.Common.ResourceType>())
+            foreach (var resourceType in Enum.GetValues<Core.Entities.ResourceType>())
             {
                 var resourceBalance = new PlayerBalance()
                 {
@@ -58,7 +59,7 @@ public class GameRepository:IGameRepository
         return player?.PlayerId ?? 0;
     }
 
-    public async Task<int> UpdateResourceAsync(int playerId,Game.Server.Common.ResourceType resourceType, int resourceValue)
+    public async Task<int> UpdateResourceAsync(int playerId,Core.Entities.ResourceType resourceType, int resourceValue)
     {
         int newBalance = 0;
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -98,7 +99,7 @@ public class GameRepository:IGameRepository
         dbContext.PlayersBalances.Update(playerBalance);
     }
 
-    public async Task<int> TransferResource(int fromPlayer, int toPlayer, Game.Server.Common.ResourceType resourceType, int resourceValue)
+    public async Task<int> TransferResource(int fromPlayer, int toPlayer, Core.Entities.ResourceType resourceType, int resourceValue)
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
         await using var transaction = await dbContext.Database.BeginTransactionAsync();

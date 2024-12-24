@@ -3,3 +3,12 @@ obj/
 /packages/
 riderModule.iml
 /_ReSharper.Caches/
+
+# Ignore SQLite DB files
+*.db
+
+# (Optional) If you have other local data or temp files, list them here as well
+*.db-journal
+*.db-shm
+*.db-wal
+*.db-wal

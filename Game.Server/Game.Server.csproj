@@ -5,6 +5,7 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>GameServer</RootNamespace>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
 
     <ItemGroup>
@@ -23,6 +24,7 @@
       <PackageReference Include="Serilog.Settings.Configuration" Version="8.0.4" />
       <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
       <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+      <PackageReference Include="StackExchange.Redis" Version="2.8.24" />
     </ItemGroup>
 
     <ItemGroup>
@@ -31,6 +33,18 @@
 
     <ItemGroup>
       <Folder Include="Migrations\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Protobuf Include="Protos\messages.proto">
+            <Generator>MSBuild:Compile</Generator>
+        </Protobuf>
     </ItemGroup>
 
 </Project>

@@ -12,13 +12,19 @@ dotnet ef database drop
 configuration can be set for multiple providers (appsettings, env vars, args) according to best practices
 solution is structured according to clean architecture
 
+db schema is comprised of 2 tables, player table (playerId is a primary key and devideId as index for faster searches) and playerBalance table (PlayerId + resource type as a composite primary key). 
 on game repo I use transaction for transfer operation to avoid partial success
 on game repo I use concurrency version for optimistic locking to avoid incossitency in data as a result from parallel exeutions
 the login action will add a player if deviceId is new, Idealy we would have a seperate signin method but for the sake of testing simpliciy I will keep the current behavior
 
+to containerize the app please use the following commands
+
+docker build -t gameserver .
+docker run -p 8080:8080 gameserver
+
 
 todo:
-1. add tests
+1. add tests V
 2. clean architecture V
 3. check functionaliy V
 4. support scaling

@@ -8,6 +8,7 @@ using GameServer.Core.Interfaces;
 using GameServer.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using StackExchange.Redis;
 using WebSocketManager = GameServer.Infrastructure.WebSocketManager;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,6 +32,10 @@ services.AddDbContextFactory<GameDbContext>(options =>
         options.EnableSensitiveDataLogging();
     }
 });
+
+string redisConnectionString = builder.Configuration.GetConnectionString("Redis:ConnectionString") ?? "localhost:6379";
+services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConnectionString));
+
 
 services.AddSingleton<IHandler, LoginHandler>();
 services.AddSingleton<IHandler, UpdateResourceHandler>();

@@ -8,5 +8,5 @@ public interface IHandler
 {
     MessageType MessageType { get; }
     
-    Task<IMessage> HandleMessageAsync(PlayerInfo info,MemoryStream stream);
+    Task<IMessage> HandleMessageAsync(PlayerInfo playerInfo,MemoryStream stream);
 }

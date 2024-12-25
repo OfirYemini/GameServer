@@ -5,29 +5,20 @@ using Google.Protobuf;
 
 namespace GameServer.Application.Handlers;
 
-public class SendGiftHandler:IHandler
+public class SendGiftHandler:BaseHandler<SendGiftRequest>
 {
     private readonly IGameRepository _gameRepository;
     private readonly INotificationManager _notificationManager;
-    public MessageType MessageType { get; } = MessageType.SendGift;
+    public override MessageType MessageType { get; } = MessageType.SendGift;
     
-    public SendGiftHandler(IGameRepository gameRepository,INotificationManager notificationManager)
+    public SendGiftHandler(IGameRepository gameRepository,INotificationManager notificationManager):base(SendGiftRequest.Parser)
     {
         _gameRepository = gameRepository;
         _notificationManager = notificationManager;
-        
     }
     
-
-    public async Task<IMessage> HandleMessageAsync(PlayerInfo info, MemoryStream stream)
+    protected override async Task<IMessage> ProcessAsync(PlayerInfo info, SendGiftRequest request)
     {
-        SendGiftRequest request = SendGiftRequest.Parser.ParseFrom(stream);
-        var validationErrorMessage = ValidateRequest(info, request);
-        if (validationErrorMessage != null)
-        {
-            return validationErrorMessage;
-        }
-        
         int newBalance = await _gameRepository.TransferResource(info.PlayerId,request.FriendPlayerId, (Core.Entities.ResourceType)request.ResourceType, request.ResourceValue);
         var response = new SendGiftResponse(){NewBalance = newBalance};
         
@@ -49,28 +40,21 @@ public class SendGiftHandler:IHandler
         }});
     }
 
-    private IMessage? ValidateRequest(PlayerInfo info, SendGiftRequest request)
+    protected override bool Validate(PlayerInfo info,SendGiftRequest request, out string? errorMessage)
     {
+        errorMessage = null;
         if (request.FriendPlayerId == info.PlayerId)
         {
-            return CreateErrorMessage("Can't send gift to yourself");
+            errorMessage ="Can't send gift to yourself";
         }
         if (request.ResourceValue <= 0)
         {
-            return CreateErrorMessage("Can't send gift with zero or negative value");
+            errorMessage ="Can't send gift with zero or negative value";
         }
-        return null;
+        return errorMessage == null;
     }
 
-    private static IMessage? CreateErrorMessage(string message)
-    {
-        return new ServerResponse()
-        {
-            ServerError = new ServerError()
-            {
-                ErrorId = Guid.NewGuid().ToString(),
-                Message = message
-            }
-        };
-    }
+    
+
+    
 }

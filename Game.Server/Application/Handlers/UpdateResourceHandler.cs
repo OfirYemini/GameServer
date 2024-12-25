@@ -5,25 +5,38 @@ using Google.Protobuf;
 
 namespace GameServer.Application.Handlers;
 
-public class UpdateResourceHandler:IHandler
+public class UpdateResourceHandler : BaseHandler<UpdateRequest>
 {
     private readonly IGameRepository _gameRepository;
-    public MessageType MessageType { get; } = MessageType.UpdateRequest;
-    public MessageParser Parser { get; } = UpdateRequest.Parser;
+    public override MessageType MessageType { get; } = MessageType.UpdateRequest;
+
     public UpdateResourceHandler(IGameRepository gameRepository)
+        : base(UpdateRequest.Parser)
     {
         _gameRepository = gameRepository;
     }
-    
-    public async Task<IMessage> HandleMessageAsync(PlayerInfo info,MemoryStream stream)
+
+    protected override bool Validate(PlayerInfo info, UpdateRequest request, out string? errorMessage)
     {
-        UpdateRequest request = UpdateRequest.Parser.ParseFrom(stream);
-        int newBalance = await _gameRepository.UpdateResourceAsync(info.PlayerId,(Core.Entities.ResourceType)request.ResourceType, request.ResourceValue);
-        var response = new UpdateResponse(){NewBalance = newBalance};
-        var serverResponse = new ServerResponse()
+        errorMessage = null;
+        if(request.ResourceValue <= 0)
         {
-            UpdateResponse = response
+            errorMessage = "Amount has to be a positive number";
+        }
+        return errorMessage == null;
+    }
+
+    protected override async Task<IMessage> ProcessAsync(PlayerInfo info, UpdateRequest request)
+    {
+        int newBalance = await _gameRepository.UpdateResourceAsync(
+            info.PlayerId,
+            (Core.Entities.ResourceType)request.ResourceType,
+            request.ResourceValue
+        );
+
+        return new ServerResponse
+        {
+            UpdateResponse = new UpdateResponse { NewBalance = newBalance }
         };
-        return serverResponse;
     }
 }

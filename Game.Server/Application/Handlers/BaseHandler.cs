@@ -8,11 +8,13 @@ namespace GameServer.Application.Handlers;
 public abstract class BaseHandler<TRequest> : IHandler where TRequest : IMessage<TRequest>
 {
     private readonly MessageParser<TRequest> _parser;
+    private readonly ILogger<IHandler> _logger;
     public abstract MessageType MessageType { get; }
 
-    protected BaseHandler(MessageParser<TRequest> parser)
+    protected BaseHandler(MessageParser<TRequest> parser,ILogger<IHandler> logger)
     {
         _parser = parser;
+        _logger = logger;
     }
 
     public async Task<IMessage> HandleMessageAsync(PlayerInfo playerInfo, MemoryStream stream)
@@ -30,8 +32,9 @@ public abstract class BaseHandler<TRequest> : IHandler where TRequest : IMessage
         }
         catch (Exception ex)
         {
-            //todo: add logger
-            return CreateErrorResponse($"Failed to process request: {ex.Message}");
+            var errorResponse = CreateErrorResponse($"Failed to process request: {ex.Message}");
+            _logger.LogError(ex,"Failed to process request, error id {errorId}",errorResponse.ServerError.ErrorId);
+            return errorResponse;
         }
     }
 
@@ -39,7 +42,7 @@ public abstract class BaseHandler<TRequest> : IHandler where TRequest : IMessage
 
     protected abstract Task<IMessage> ProcessAsync(PlayerInfo info, TRequest request);
 
-    private IMessage CreateErrorResponse(string message)
+    private ServerResponse CreateErrorResponse(string message)
     {
         return new ServerResponse
         {

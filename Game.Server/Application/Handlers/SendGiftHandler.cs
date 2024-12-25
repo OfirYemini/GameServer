@@ -11,7 +11,7 @@ public class SendGiftHandler:BaseHandler<SendGiftRequest>
     private readonly INotificationManager _notificationManager;
     public override MessageType MessageType { get; } = MessageType.SendGift;
     
-    public SendGiftHandler(IGameRepository gameRepository,INotificationManager notificationManager):base(SendGiftRequest.Parser)
+    public SendGiftHandler(IGameRepository gameRepository,INotificationManager notificationManager,ILogger<SendGiftHandler> logger):base(SendGiftRequest.Parser,logger)
     {
         _gameRepository = gameRepository;
         _notificationManager = notificationManager;

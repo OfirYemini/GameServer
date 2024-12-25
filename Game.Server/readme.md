@@ -10,6 +10,8 @@ if you want to drop the current db:
 dotnet ef database drop   
 
 solution is structured according to clean architecture
+on game repo I use transaction for transfer operation to avoid partial success
+on game repo I use concurrency version for optimistic locking to avoid incossitency in data as a result from parallel exeutions
 
 todo:
 1. add tests
@@ -19,5 +21,6 @@ todo:
 5. add integration tests with test containers
 6. dockerize server and client
 7. validate db schema V
-8. handle validations in a clean way
-9. add polly policy
+8. handle validations in a clean way V
+9. fix client console print 
+10. allow client extension

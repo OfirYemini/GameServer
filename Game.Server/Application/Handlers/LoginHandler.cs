@@ -11,7 +11,7 @@ public class LoginHandler:BaseHandler<LoginRequest>
     public override MessageType MessageType { get; } = MessageType.LoginRequest;
     
 
-    public LoginHandler(IGameRepository gameRepository):base(LoginRequest.Parser)
+    public LoginHandler(IGameRepository gameRepository,ILogger<LoginHandler> logger):base(LoginRequest.Parser,logger)
     {
         _gameRepository = gameRepository;
     }

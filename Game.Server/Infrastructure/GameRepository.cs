@@ -63,7 +63,6 @@ public class GameRepository:IGameRepository
     {
         int newBalance = 0;
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
-        //await using var transaction = await dbContext.Database.BeginTransactionAsync();
         
         var playerBalance = await dbContext.PlayersBalances.FirstOrDefaultAsync(p=>p.PlayerId == playerId && p.ResourceType==(byte)resourceType);
 

@@ -10,8 +10,8 @@ public class UpdateResourceHandler : BaseHandler<UpdateRequest>
     private readonly IGameRepository _gameRepository;
     public override MessageType MessageType { get; } = MessageType.UpdateRequest;
 
-    public UpdateResourceHandler(IGameRepository gameRepository)
-        : base(UpdateRequest.Parser)
+    public UpdateResourceHandler(IGameRepository gameRepository,ILogger<UpdateResourceHandler> logger)
+        : base(UpdateRequest.Parser,logger)
     {
         _gameRepository = gameRepository;
     }

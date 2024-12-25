@@ -1,7 +1,7 @@
 # Game Server - README
 
 ## Overview
-This project implements a game server following clean architecture principles. The solution is designed for scalability and maintainability, leveraging Redis for notifications and ensuring data consistency with transactions and optimistic locking.
+This project implements a game server following clean architecture principles. Application\Infrastructure\Core(Domain) should be seperated to projects but because the solution is small I kept it simple. The solution is designed for scalability and maintainability, leveraging Redis for notifications and ensuring data consistency with transactions and optimistic locking.
 
 ---
 

@@ -1,6 +1,6 @@
 ﻿using Google.Protobuf;
 
-namespace GameServer.Core.Interfaces;
+namespace GameServer.Application.Interfaces;
 
 public interface INotificationManager
 {

@@ -1,6 +1,6 @@
 ﻿using Game.Contracts;
+using GameServer.Application.Interfaces;
 using GameServer.Core.Entities;
-using GameServer.Core.Interfaces;
 using Google.Protobuf;
 
 namespace GameServer.Application.Handlers;

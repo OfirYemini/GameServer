@@ -2,7 +2,7 @@
 using GameServer.Core.Entities;
 using Google.Protobuf;
 
-namespace GameServer.Core.Interfaces;
+namespace GameServer.Application.Interfaces;
 
 public interface IHandler
 {

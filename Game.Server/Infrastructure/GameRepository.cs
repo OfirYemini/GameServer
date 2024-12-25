@@ -1,5 +1,5 @@
 ﻿using Game.Server.DataAccess;
-using GameServer.Core.Interfaces;
+using GameServer.Application.Interfaces;
 using GameServer.Infrastructure.Entities;
 using Microsoft.EntityFrameworkCore;
 

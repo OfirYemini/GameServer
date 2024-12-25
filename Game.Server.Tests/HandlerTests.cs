@@ -1,8 +1,8 @@
 ﻿using FluentAssertions;
 using GameServer.Application.Handlers;
+using GameServer.Application.Interfaces;
 using GameServer.Core;
 using GameServer.Core.Entities;
-using GameServer.Core.Interfaces;
 using Google.Protobuf;
 using Microsoft.Extensions.Logging;
 using NSubstitute;

@@ -1,6 +1,6 @@
 ﻿using System.Net.WebSockets;
 
-namespace GameServer.Core.Interfaces;
+namespace GameServer.Application.Interfaces;
 
 public interface IWebSocketManager
 {

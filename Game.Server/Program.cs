@@ -4,7 +4,7 @@ using Game.Server;
 using Game.Server.DataAccess;
 using GameServer.Application;
 using GameServer.Application.Handlers;
-using GameServer.Core.Interfaces;
+using GameServer.Application.Interfaces;
 using GameServer.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Serilog;

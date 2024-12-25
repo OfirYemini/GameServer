@@ -1,4 +1,4 @@
-﻿using GameServer.Core.Interfaces;
+﻿using GameServer.Application.Interfaces;
 using Google.Protobuf;
 using StackExchange.Redis;
 

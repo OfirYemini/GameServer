@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Net.WebSockets;
 using Game.Contracts;
-using GameServer.Core.Interfaces;
+using GameServer.Application.Interfaces;
 using Google.Protobuf;
 using PlayerInfo = GameServer.Core.Entities.PlayerInfo;
 

@@ -3,7 +3,6 @@
 public enum MessageType:byte
 {
     LoginRequest = 1,
-    LoginResponse = 2,//todo:remove
-    UpdateRequest = 3,
-    SendGift = 4,
+    UpdateRequest = 2,
+    SendGift = 3,
 }

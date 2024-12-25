@@ -13,14 +13,9 @@ public class GameDbContext : DbContext
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Configure DeviceId as primary key
         modelBuilder.Entity<Player>()
             .HasKey(p => p.PlayerId);
 
-        // modelBuilder.Entity<Player>()
-        //     .Property(p => p.PlayerId)
-        //     .ValueGeneratedOnAdd();
-        
         modelBuilder.Entity<Player>()
             .HasIndex(p => p.DeviceId);
   
@@ -34,5 +29,9 @@ public class GameDbContext : DbContext
         modelBuilder.Entity<PlayerBalance>()
             .ToTable(b => b.HasCheckConstraint("CK_PlayerBalance_Positive", "ResourceBalance >= 0"));
 
+        modelBuilder.Entity<PlayerBalance>()
+            .HasOne<Player>()
+            .WithMany()
+            .HasForeignKey(pb => pb.PlayerId);
     }
 }

@@ -9,13 +9,12 @@ dotnet ef migrations add InitialCreate
 if you want to drop the current db:
 dotnet ef database drop   
 
+solution is structured according to clean architecture
 
 todo:
 1. add tests
-2. remove todos
-2. clean architecture
-2. check functionaliy V
-3. enrich data with playerId
+2. clean architecture V
+3. check functionaliy V
 4. support scaling
 5. add integration tests with test containers
 6. dockerize server and client

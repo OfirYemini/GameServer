@@ -37,6 +37,12 @@ namespace GameServer.Migrations
                 {
                     table.PrimaryKey("PK_PlayersBalances", x => new { x.PlayerId, x.ResourceType });
                     table.CheckConstraint("CK_PlayerBalance_Positive", "ResourceBalance >= 0");
+                    table.ForeignKey(
+                        name: "FK_PlayersBalances_Players_PlayerId",
+                        column: x => x.PlayerId,
+                        principalTable: "Players",
+                        principalColumn: "PlayerId",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -49,10 +55,10 @@ namespace GameServer.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Players");
+                name: "PlayersBalances");
 
             migrationBuilder.DropTable(
-                name: "PlayersBalances");
+                name: "Players");
         }
     }
 }

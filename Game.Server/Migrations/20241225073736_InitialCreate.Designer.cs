@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GameServer.Migrations
 {
     [DbContext(typeof(GameDbContext))]
-    [Migration("20241224141242_InitialCreate")]
+    [Migration("20241225073736_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -20,7 +20,7 @@ namespace GameServer.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.11");
 
-            modelBuilder.Entity("GameServer.Infrastructure.Player", b =>
+            modelBuilder.Entity("GameServer.Infrastructure.Entities.Player", b =>
                 {
                     b.Property<int>("PlayerId")
                         .ValueGeneratedOnAdd()
@@ -36,7 +36,7 @@ namespace GameServer.Migrations
                     b.ToTable("Players");
                 });
 
-            modelBuilder.Entity("GameServer.Infrastructure.PlayerBalance", b =>
+            modelBuilder.Entity("GameServer.Infrastructure.Entities.PlayerBalance", b =>
                 {
                     b.Property<int>("PlayerId")
                         .HasColumnType("INTEGER");
@@ -57,6 +57,15 @@ namespace GameServer.Migrations
                         {
                             t.HasCheckConstraint("CK_PlayerBalance_Positive", "ResourceBalance >= 0");
                         });
+                });
+
+            modelBuilder.Entity("GameServer.Infrastructure.Entities.PlayerBalance", b =>
+                {
+                    b.HasOne("GameServer.Infrastructure.Entities.Player", null)
+                        .WithMany()
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

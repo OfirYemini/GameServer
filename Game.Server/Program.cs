@@ -13,12 +13,6 @@ using WebSocketManager = GameServer.Infrastructure.WebSocketManager;
 var builder = WebApplication.CreateBuilder(args);
 
 
-WebSocketOptions wsOptions = new WebSocketOptions()
-{
-    //KeepAliveInterval = TimeSpan.FromMinutes(1), // todo: default is 2, load from config
-    //AllowedOrigins = { "https://localhost:4201" } // todo: use certificate
-    
-};
 
 builder.Host.UseSerilog((context, configuration) =>
     configuration.ReadFrom.Configuration(context.Configuration));
@@ -28,9 +22,8 @@ var mappingConfig = new MapperConfiguration(cfg =>
     cfg.AddProfile(new MappingProfile());
 });
 
-// IMapper mapper = mappingConfig.CreateMapper();
-//
-// builder.Services.AddSingleton(mapper);
+WebSocketOptions wsOptions = new WebSocketOptions();
+builder.Configuration.GetSection("WebSockets").Bind(wsOptions);
 
 
 var services = builder.Services;
@@ -43,10 +36,6 @@ services.AddDbContextFactory<GameDbContext>(options =>
         options.EnableSensitiveDataLogging();
     }
 });
-
-
-
-
 
 services.AddSingleton<IHandler, LoginHandler>();
 services.AddSingleton<IHandler, UpdateResourceHandler>();

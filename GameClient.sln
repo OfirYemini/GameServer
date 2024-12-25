@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameClient", "GameClient\GameClient.csproj", "{BB7AC493-174B-4CF7-92B7-922F7107D138}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Game.Contracts", "Game.Contracts\Game.Contracts.csproj", "{85D0E62A-5B8B-424A-925C-1726562D6166}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BB7AC493-174B-4CF7-92B7-922F7107D138}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BB7AC493-174B-4CF7-92B7-922F7107D138}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BB7AC493-174B-4CF7-92B7-922F7107D138}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BB7AC493-174B-4CF7-92B7-922F7107D138}.Release|Any CPU.Build.0 = Release|Any CPU
+		{85D0E62A-5B8B-424A-925C-1726562D6166}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85D0E62A-5B8B-424A-925C-1726562D6166}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85D0E62A-5B8B-424A-925C-1726562D6166}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{85D0E62A-5B8B-424A-925C-1726562D6166}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

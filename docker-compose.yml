@@ -1,0 +1,28 @@
+﻿services:
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"    
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped  
+      
+  game.server:
+    image: game.server
+    build:
+      context: .
+      dockerfile: Game.Server/Dockerfile
+    ports:
+      - "5214:5214"
+    volumes:
+      # The left-hand side is the path on your host, the right-hand side is inside the container.
+      - ./Game.Server/GameServerDb.db:/app/GameServerDb.db
+    depends_on:
+      - redis
+    environment:      
+      ASPNETCORE_URLS: "http://+:5214"      
+      ConnectionStrings__Redis__ConnectionString: "redis:6379"
+    restart: unless-stopped
+volumes:
+  redis-data:

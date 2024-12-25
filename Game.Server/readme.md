@@ -51,6 +51,12 @@ To stop and remove the Redis container (if needed):
  docker rm redis-server
 ```
 
+or if you prefer you can use the docker compose command to quickly run the app:
+```bash
+docker-compose up --build
+```
+
+
 ---
 
 ## Configuration

@@ -1,4 +1,5 @@
 ﻿using Game.Contracts;
+using GameServer.Core;
 using GameServer.Core.Entities;
 using GameServer.Core.Interfaces;
 using Google.Protobuf;
@@ -45,11 +46,11 @@ public class SendGiftHandler:BaseHandler<SendGiftRequest>
         errorMessage = null;
         if (request.FriendPlayerId == info.PlayerId)
         {
-            errorMessage ="Can't send gift to yourself";
+            errorMessage = ErrorMessages.CannotSendGiftToSelf;
         }
         if (request.ResourceValue <= 0)
         {
-            errorMessage ="Can't send gift with zero or negative value";
+            errorMessage =ErrorMessages.AmountMustBePositive;
         }
         return errorMessage == null;
     }

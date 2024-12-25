@@ -17,11 +17,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog((context, configuration) =>
     configuration.ReadFrom.Configuration(context.Configuration));
 
-var mappingConfig = new MapperConfiguration(cfg =>
-{
-    cfg.AddProfile(new MappingProfile());
-});
-
 WebSocketOptions wsOptions = new WebSocketOptions();
 builder.Configuration.GetSection("WebSockets").Bind(wsOptions);
 

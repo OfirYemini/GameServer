@@ -1,4 +1,5 @@
 ﻿using Game.Contracts;
+using GameServer.Core;
 using GameServer.Core.Entities;
 using GameServer.Core.Interfaces;
 using Google.Protobuf;
@@ -21,7 +22,7 @@ public class LoginHandler:BaseHandler<LoginRequest>
         errorMessage = null;
         if(!Guid.TryParse(request.DeviceId,out _))
         {
-            errorMessage = "Invalid Device ID";
+            errorMessage = ErrorMessages.InvalidDeviceId;
         }
         return errorMessage == null;
     }

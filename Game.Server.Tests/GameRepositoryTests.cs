@@ -75,6 +75,7 @@ public class GameRepositoryTests:IDisposable, IAsyncDisposable
             var playerBalance = new PlayerBalance { PlayerId = playerId, ResourceType = (byte)resourceType, ResourceBalance = initialBalance };
             
             _dbContext.PlayersBalances.Add(playerBalance);
+            _dbContext.Players.Add(new Player(){PlayerId = 5,DeviceId = Guid.NewGuid()});
             await _dbContext.SaveChangesAsync();
             
             //Act
@@ -110,6 +111,7 @@ public class GameRepositoryTests:IDisposable, IAsyncDisposable
             var toBalance = new PlayerBalance { PlayerId = toPlayer.PlayerId, ResourceType = (byte)resourceType, ResourceBalance = toInitial };
             
             _dbContext.PlayersBalances.AddRange(fromBalance, toBalance);
+            _dbContext.Players.AddRange(fromPlayer,toPlayer);
             await _dbContext.SaveChangesAsync();
             
             //Act
@@ -131,6 +133,7 @@ public class GameRepositoryTests:IDisposable, IAsyncDisposable
             var toBalance = new PlayerBalance { PlayerId = toPlayer.PlayerId, ResourceType = (byte)resourceType, ResourceBalance = 10 };
             
             _dbContext.PlayersBalances.AddRange(fromBalance, toBalance);
+            _dbContext.Players.AddRange(fromPlayer,toPlayer);
             await _dbContext.SaveChangesAsync();
             
             //Act & Assert

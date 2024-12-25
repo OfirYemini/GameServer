@@ -1,4 +1,5 @@
 ﻿using Game.Contracts;
+using GameServer.Core;
 using GameServer.Core.Entities;
 using GameServer.Core.Interfaces;
 using Google.Protobuf;
@@ -21,7 +22,7 @@ public class UpdateResourceHandler : BaseHandler<UpdateRequest>
         errorMessage = null;
         if(request.ResourceValue <= 0)
         {
-            errorMessage = "Amount has to be a positive number";
+            errorMessage = ErrorMessages.AmountMustBePositive;
         }
         return errorMessage == null;
     }

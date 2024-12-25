@@ -9,9 +9,13 @@ dotnet ef migrations add InitialCreate
 if you want to drop the current db:
 dotnet ef database drop   
 
+configuration can be set for multiple providers (appsettings, env vars, args) according to best practices
 solution is structured according to clean architecture
+
 on game repo I use transaction for transfer operation to avoid partial success
 on game repo I use concurrency version for optimistic locking to avoid incossitency in data as a result from parallel exeutions
+the login action will add a player if deviceId is new, Idealy we would have a seperate signin method but for the sake of testing simpliciy I will keep the current behavior
+
 
 todo:
 1. add tests

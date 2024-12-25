@@ -61,7 +61,13 @@ The database schema consists of two main tables:
   - A player is automatically registered upon login if the `deviceId` is new.
   - While a dedicated sign-in method would typically handle this, the current implementation consolidates these operations for simplicity during testing.
 - **Response Handling**:
-  - Server responses leverage Protobuf's `OneOf` to return either a successful response or an error.
+  - Server responses leverage Protobuf's `OneOf` to return either a successful response or an error. app can be extended by additional messages handlers by implementing the IHandler interface and by registring it to the ioc container. the handler will need to expose a new meesage type in order for it to be correctly routed. 
+    ```
+    services.AddSingleton<IHandler, NewHandler>();
+    ```
+    ```
+    public override MessageType MessageType { get; } = MessageType.UpdateRequest;
+    ```
 - **Scalability**:
   - Redis Pub/Sub is used for notifications, supporting horizontal scaling across multiple server instances.
 
@@ -73,6 +79,16 @@ To containerize and run the application, use the following command, it will spin
 ```bash
 docker-compose up --build
 ```
+
+## Test Client
+Test client can be run by using the following command under the Game.Client lib
+
+```bash
+.\Game.Client.exe
+```
+
+
+
 
 ---
 

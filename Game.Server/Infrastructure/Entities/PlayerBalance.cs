@@ -1,4 +1,4 @@
-﻿namespace GameServer.Infrastructure;
+﻿namespace GameServer.Infrastructure.Entities;
 
 public class PlayerBalance
 {

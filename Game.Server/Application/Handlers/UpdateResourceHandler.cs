@@ -1,18 +1,16 @@
 ﻿using Game.Contracts;
-using Game.Server;
-using Game.Server.Common;
 using GameServer.Core.Entities;
 using GameServer.Core.Interfaces;
 using Google.Protobuf;
 
-namespace GameServer.Application.Commands;
+namespace GameServer.Application.Handlers;
 
-public class UpdateResourceCommand:ICommandHandler
+public class UpdateResourceHandler:IHandler
 {
     private readonly IGameRepository _gameRepository;
     public MessageType MessageType { get; } = MessageType.UpdateRequest;
     public MessageParser Parser { get; } = UpdateRequest.Parser;
-    public UpdateResourceCommand(IGameRepository gameRepository)
+    public UpdateResourceHandler(IGameRepository gameRepository)
     {
         _gameRepository = gameRepository;
     }

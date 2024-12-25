@@ -1,19 +1,17 @@
 ﻿using Game.Contracts;
-using Game.Server;
-using Game.Server.Common;
 using GameServer.Core.Entities;
 using GameServer.Core.Interfaces;
 using Google.Protobuf;
 
-namespace GameServer.Application.Commands;
+namespace GameServer.Application.Handlers;
 
-public class SendGiftCommand:ICommandHandler
+public class SendGiftHandler:IHandler
 {
     private readonly IGameRepository _gameRepository;
     private readonly INotificationManager _notificationManager;
     public MessageType MessageType { get; } = MessageType.SendGift;
     
-    public SendGiftCommand(IGameRepository gameRepository,INotificationManager notificationManager)
+    public SendGiftHandler(IGameRepository gameRepository,INotificationManager notificationManager)
     {
         _gameRepository = gameRepository;
         _notificationManager = notificationManager;

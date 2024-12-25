@@ -11,10 +11,10 @@ public class WebSocketManager : IWebSocketManager,IDisposable
 {
     private readonly ILogger<WebSocketManager> _logger;
     private readonly INotificationManager _notificationManager;
-    private readonly Dictionary<MessageType, ICommandHandler> _handlers;
+    private readonly Dictionary<MessageType, IHandler> _handlers;
     private readonly ConcurrentDictionary<int, (WebSocket webSocket, PlayerInfo playerInfo)> _activeSessions = new();
 
-    public WebSocketManager(IEnumerable<ICommandHandler> handlers, INotificationManager notificationManager, ILogger<WebSocketManager> logger)
+    public WebSocketManager(IEnumerable<IHandler> handlers, INotificationManager notificationManager, ILogger<WebSocketManager> logger)
     {
         _logger = logger;
         _notificationManager = notificationManager;

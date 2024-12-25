@@ -1,4 +1,5 @@
 ﻿using GameServer.Infrastructure;
+using GameServer.Infrastructure.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Game.Server.DataAccess;

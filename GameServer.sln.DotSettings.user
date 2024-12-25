@@ -4,6 +4,7 @@
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=06a3b957_002D4fb3_002D4c86_002D9c86_002D6c00fda0163c/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="GetOrAddPlayerAsync_PlayerExists_ReturnsPlayerId" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;TestAncestor&gt;&#xD;
     &lt;TestId&gt;xUnit::DB4648E6-3135-442D-8DDC-EA37A4FD746E::net8.0::Game.Server.Tests.GameRepositoryTests&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::DB4648E6-3135-442D-8DDC-EA37A4FD746E::net8.0::Game.Server.Tests.WebSocketManagerTests.HandleWebSocketSessionAsync_CallsLogin&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
 	

@@ -1,16 +1,11 @@
-﻿using System.Net.WebSockets;
-using System.Text;
-using System.Text.Json;
-using Game.Contracts;
-using Game.Server.Common;
+﻿using Game.Contracts;
 using GameServer.Core.Entities;
 using GameServer.Core.Interfaces;
 using Google.Protobuf;
-using Google.Protobuf.Reflection;
 
-namespace Game.Server.Handlers;
+namespace GameServer.Application.Handlers;
 
-public class LoginHandler:ICommandHandler
+public class LoginHandler:IHandler
 {
     private readonly IGameRepository _gameRepository;
     public MessageType MessageType { get; } = MessageType.LoginRequest;

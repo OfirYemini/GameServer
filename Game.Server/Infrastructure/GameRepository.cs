@@ -1,6 +1,6 @@
-﻿using Game.Server.Common;
-using Game.Server.DataAccess;
+﻿using Game.Server.DataAccess;
 using GameServer.Core.Interfaces;
+using GameServer.Infrastructure.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace GameServer.Infrastructure;

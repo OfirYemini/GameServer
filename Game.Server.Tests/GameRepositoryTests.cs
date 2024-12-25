@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Game.Server.DataAccess;
 using GameServer.Infrastructure;
+using GameServer.Infrastructure.Entities;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

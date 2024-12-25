@@ -1,36 +1,98 @@
-in order to run the application
+# Game Server - README
 
-1. install dotnet-ef tool: 
-dotnet tool install --global dotnet-ef --version 8.0.0
-2. cd into GameServer project and run:
-dotnet ef migrations add InitialCreate
-3. dotnet ef database update     
+## Overview
+This project implements a game server following clean architecture principles. The solution is designed for scalability and maintainability, leveraging Redis for notifications and ensuring data consistency with transactions and optimistic locking.
 
-if you want to drop the current db:
-dotnet ef database drop   
+---
 
-configuration can be set for multiple providers (appsettings, env vars, args) according to best practices
-solution is structured according to clean architecture
+## Prerequisites
+Ensure you have the following tools installed before running the application:
+- .NET SDK 8.0+
+- Docker (for containerization)
+- Redis (optional for local testing)
 
-db schema is comprised of 2 tables, player table (playerId is a primary key and devideId as index for faster searches) and playerBalance table (PlayerId + resource type as a composite primary key). 
-on game repo I use transaction for transfer operation to avoid partial success
-on game repo I use concurrency version for optimistic locking to avoid incossitency in data as a result from parallel exeutions
-the login action will add a player if deviceId is new, Idealy we would have a seperate signin method but for the sake of testing simpliciy I will keep the current behavior
+---
 
-to containerize the app please use the following commands
+## Getting Started
 
-docker build -t gameserver .
-docker run -p 8080:8080 gameserver
+### 1. Install Entity Framework Core CLI
+```bash
+ dotnet tool install --global dotnet-ef --version 8.0.0
+```
 
+### 2. Apply Database Migrations
+Navigate to the GameServer project directory and run the following commands:
+```bash
+ cd GameServer
+ dotnet ef migrations add InitialCreate
+ dotnet ef database update
+```
 
-todo:
-1. add tests V
-2. clean architecture V
-3. check functionaliy V
-4. support scaling
-5. add integration tests with test containers
-6. dockerize server and client
-7. validate db schema V
-8. handle validations in a clean way V
-9. fix client console print 
-10. allow client extension
+### 3. Dropping the Database (Optional)
+If you need to reset the database, you can drop it using:
+```bash
+ dotnet ef database drop
+```
+
+---
+
+## Configuration
+Configuration can be set through multiple providers, following industry best practices:
+- **appsettings.json**
+- **Environment Variables**
+- **Command Line Arguments**
+
+---
+
+## Database Schema
+The database schema consists of two main tables:
+- **Player Table**:
+    - `playerId` - Primary Key
+    - `deviceId` - Indexed for faster lookups
+- **PlayerBalance Table**:
+    - Composite Primary Key: `playerId` + `resourceType`
+
+### Data Integrity and Concurrency
+- **Transactional Operations**: Transactions are used to ensure atomicity during player balance transfers, preventing partial updates.
+- **Optimistic Locking**: Concurrency versioning is employed to avoid data inconsistencies arising from parallel execution.
+
+---
+
+## Application Logic
+- **Player Registration/Login**:
+    - A player is automatically registered upon login if the `deviceId` is new.
+    - While a dedicated sign-in method would typically handle this, the current implementation consolidates these operations for simplicity during testing.
+- **Response Handling**:
+    - Server responses leverage Protobuf's `OneOf` to return either a successful response or an error.
+- **Scalability**:
+    - Redis Pub/Sub is used for notifications, supporting horizontal scaling across multiple server instances.
+
+---
+
+## Containerization
+To containerize and run the application, use the following commands:
+
+```bash
+ docker build -t gameserver .
+ docker run -p 8080:8080 gameserver
+```
+
+---
+
+## TODO
+
+- [x] Add Unit Tests
+- [x] Implement Clean Architecture
+- [x] Validate Core Functionality
+- [ ] Support Horizontal Scaling
+- [ ] Add Integration Tests with TestContainers
+- [ ] Dockerize Both Server and Client
+- [x] Validate Database Schema
+- [x] Implement Proper Input Validation
+- [ ] Improve Client Console Output
+- [ ] Enable Client Extensions
+
+---
+
+For contributions or further inquiries, please feel free to open an issue or reach out directly.
+

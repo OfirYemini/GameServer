@@ -25,6 +25,12 @@ public class GameServerWs : IGameServerWs,IDisposable
         _cts = new CancellationTokenSource();
         StartReceiveLoop();
     }
+
+    public async Task CloseWebsocket()
+    {
+        await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Session closed", CancellationToken.None);
+        await _cts.CancelAsync();
+    }
     
     private void StartReceiveLoop()
     {

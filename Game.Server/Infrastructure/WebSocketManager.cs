@@ -84,7 +84,11 @@ public class WebSocketManager : IWebSocketManager,IDisposable
             _activeSessions.TryRemove(playerInfo.PlayerId, out _);
         }
 
-        await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Session closed", CancellationToken.None);
+        if (webSocket.State == WebSocketState.Open)
+        {
+            await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Session closed", CancellationToken.None);    
+        }
+        
     }
 
     private async Task<PlayerInfo?> ProcessLoginRequestAsync(WebSocket webSocket, MessageType messageType, string connectionId, MemoryStream inputStream)

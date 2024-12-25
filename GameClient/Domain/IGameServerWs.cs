@@ -6,4 +6,5 @@ public interface IGameServerWs
     Task LoginAsync(string deviceId);
     Task UpdateResourceAsync(ResourceType resourceType, int resourceValue);
     Task SendGiftAsync(int toPlayerId,ResourceType resourceType, int resourceValue);
+    Task CloseWebsocket();
 }

@@ -7,11 +7,13 @@ public class ConsoleMenu: BackgroundService
 {
     private readonly IGameServerWs _client;
     private readonly ILogger<ConsoleMenu> _logger;
+    private readonly IHostApplicationLifetime _hostApplicationLifetime;
 
-    public ConsoleMenu(IGameServerWs client, ILogger<ConsoleMenu> logger)
+    public ConsoleMenu(IGameServerWs client, ILogger<ConsoleMenu> logger, IHostApplicationLifetime hostApplicationLifetime)
     {
         _client = client;
         _logger = logger;
+        _hostApplicationLifetime = hostApplicationLifetime;
 
         _client.OnMessageReceived += PrintMessage;
     }
@@ -31,7 +33,7 @@ public class ConsoleMenu: BackgroundService
         else if (serverResponse.InnerResponseCase == ServerResponse.InnerResponseOneofCase.SendGiftResponse)
         {
             var response = serverResponse.SendGiftResponse;
-            Console.WriteLine($"UpdateResponse: New Balance={response.NewBalance}");
+            Console.WriteLine($"SendGiftResponse: New Balance={response.NewBalance}");
         }
         else if (serverResponse.InnerResponseCase == ServerResponse.InnerResponseOneofCase.GiftEvent)
         {
@@ -75,12 +77,14 @@ public class ConsoleMenu: BackgroundService
                     break;
                 case "4":
                     exit = true;
-                    _logger.LogInformation("Exiting application...");
+                    await _client.CloseWebsocket();
+                    _hostApplicationLifetime.StopApplication();
                     break;
                 default:
                     Console.WriteLine("Invalid choice. Please enter 1-4.");
                     break;
             }
+            await Task.Delay(2500, stoppingToken);
         }
     }
 

@@ -9,7 +9,7 @@ This project implements a game server following clean architecture principles. T
 Ensure you have the following tools installed before running the application:
 - .NET SDK 8.0+
 - Docker (for containerization)
-- Redis (optional for local testing)
+- Redis (for pubsub operations)
 
 ---
 
@@ -21,10 +21,9 @@ Ensure you have the following tools installed before running the application:
 ```
 
 ### 2. Apply Database Migrations
-Navigate to the GameServer project directory and run the following commands:
+Navigate to the Game.Server project directory and run the following commands:
 ```bash
- cd GameServer
- dotnet ef migrations add InitialCreate
+ cd Game.Server 
  dotnet ef database update
 ```
 
@@ -41,9 +40,6 @@ If you do not have Redis installed locally, you can run it using Docker:
 ```bash
  docker run --name redis-server -d -p 6379:6379 redis
 ```
-- `--name redis-server` gives the container a friendly name.
-- `-d` runs the container in detached mode.
-- `-p 6379:6379` maps the Redis default port to your local machine.
 
 To verify Redis is running:
 ```bash
@@ -95,7 +91,7 @@ To containerize and run the application, use the following commands:
 
 ```bash
  docker build -t gameserver .
- docker run -p 8080:8080 gameserver
+ docker run -d -p 5214:5214 gameserver
 ```
 
 ---

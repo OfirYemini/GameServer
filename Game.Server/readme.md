@@ -33,31 +33,6 @@ If you need to reset the database, you can drop it using:
  dotnet ef database drop
 ```
 
----
-
-## Running Redis with Docker
-If you do not have Redis installed locally, you can run it using Docker:
-```bash
- docker run --name redis-server -d -p 6379:6379 redis
-```
-
-To verify Redis is running:
-```bash
- docker ps
-```
-To stop and remove the Redis container (if needed):
-```bash
- docker stop redis-server
- docker rm redis-server
-```
-
-or if you prefer you can use the docker compose command to quickly run the app:
-```bash
-docker-compose up --build
-```
-
-
----
 
 ## Configuration
 Configuration can be set through multiple providers, following industry best practices:
@@ -93,11 +68,10 @@ The database schema consists of two main tables:
 ---
 
 ## Containerization
-To containerize and run the application, use the following commands:
+To containerize and run the application, use the following command, it will spin up both app & redis container:
 
 ```bash
- docker build -t gameserver .
- docker run -d -p 5214:5214 gameserver
+docker-compose up --build
 ```
 
 ---
@@ -109,11 +83,11 @@ To containerize and run the application, use the following commands:
 - [x] Validate Core Functionality
 - [x] Support Horizontal Scaling
 - [ ] Add Integration Tests with TestContainers
-- [ ] Dockerize Both Server and Client
+- [x] Dockerize Server
 - [x] Validate Database Schema
 - [x] Implement Proper Input Validation
 - [x] Improve Client Console Output
-- [ ] Enable Client Extensions
+- [ ] Use https with certificate for secured connection
 
 ---
 

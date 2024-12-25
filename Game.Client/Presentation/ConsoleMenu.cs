@@ -43,7 +43,7 @@ public class ConsoleMenu: BackgroundService
         else if (serverResponse.InnerResponseCase == ServerResponse.InnerResponseOneofCase.ServerError)
         {
             var response = serverResponse.ServerError;
-            Console.WriteLine($"Unexpected error received. {response.Message}");
+            Console.WriteLine($"Unexpected error received. {response.Message} with error id {response.ErrorId}");
         }
         else
         {

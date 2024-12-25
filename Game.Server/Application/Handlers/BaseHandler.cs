@@ -32,7 +32,7 @@ public abstract class BaseHandler<TRequest> : IHandler where TRequest : IMessage
         }
         catch (Exception ex)
         {
-            var errorResponse = CreateErrorResponse($"Failed to process request: {ex.Message}");
+            var errorResponse = CreateErrorResponse($"Failed to process request");
             _logger.LogError(ex,"Failed to process request, error id {errorId}",errorResponse.ServerError.ErrorId);
             return errorResponse;
         }

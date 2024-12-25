@@ -80,7 +80,7 @@ public class GameRepository:IGameRepository
         catch (DbUpdateConcurrencyException ex)
         {
             _logger.LogError(ex,"Failed to update resource, concurrency exception");
-            throw;
+            throw;//todo: maybe a retry policy should be applied on the caller
         }
         
         return newBalance;

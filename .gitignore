@@ -14,5 +14,3 @@ riderModule.iml
 *.user
 *.vscode
 .git/
-docker-compose*
-Dockerfile

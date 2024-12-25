@@ -82,11 +82,6 @@ public class GameRepository:IGameRepository
             _logger.LogError(ex,"Failed to update resource, concurrency exception");
             throw;
         }
-        catch (Exception ex)
-        {
-           // await transaction.RollbackAsync();
-            throw;
-        }
         
         return newBalance;
     }
@@ -114,7 +109,7 @@ public class GameRepository:IGameRepository
             var toPlayerBalance = playerBalances.FirstOrDefault(pb => pb.PlayerId == toPlayer);
 
             ValidateTransfer(fromPlayer, toPlayer, resourceValue, fromPlayerBalance, toPlayerBalance);
-            //todo: impotant handle concurenncy
+            
             UpdateBalance(dbContext,fromPlayerBalance!,-1 * resourceValue);
             UpdateBalance(dbContext,toPlayerBalance!,resourceValue);
             
@@ -127,7 +122,7 @@ public class GameRepository:IGameRepository
         {
             await transaction.RollbackAsync();
             _logger.LogError(ex,"Failed to transfer resource, concurrency exception");
-            throw;//todo: clean and maybe retry
+            throw;
         }
         catch (Exception ex)
         {

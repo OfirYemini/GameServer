@@ -66,6 +66,5 @@ public class NotificationManager : INotificationManager, IDisposable
     public void Dispose()
     {
         _subscriptionQueue?.Unsubscribe();
-        _subscriptionQueue = null;
     }
 }

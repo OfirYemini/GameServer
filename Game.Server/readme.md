@@ -36,6 +36,27 @@ If you need to reset the database, you can drop it using:
 
 ---
 
+## Running Redis with Docker
+If you do not have Redis installed locally, you can run it using Docker:
+```bash
+ docker run --name redis-server -d -p 6379:6379 redis
+```
+- `--name redis-server` gives the container a friendly name.
+- `-d` runs the container in detached mode.
+- `-p 6379:6379` maps the Redis default port to your local machine.
+
+To verify Redis is running:
+```bash
+ docker ps
+```
+To stop and remove the Redis container (if needed):
+```bash
+ docker stop redis-server
+ docker rm redis-server
+```
+
+---
+
 ## Configuration
 Configuration can be set through multiple providers, following industry best practices:
 - **appsettings.json**
@@ -47,10 +68,10 @@ Configuration can be set through multiple providers, following industry best pra
 ## Database Schema
 The database schema consists of two main tables:
 - **Player Table**:
-    - `playerId` - Primary Key
-    - `deviceId` - Indexed for faster lookups
+  - `playerId` - Primary Key
+  - `deviceId` - Indexed for faster lookups
 - **PlayerBalance Table**:
-    - Composite Primary Key: `playerId` + `resourceType`
+  - Composite Primary Key: `playerId` + `resourceType`
 
 ### Data Integrity and Concurrency
 - **Transactional Operations**: Transactions are used to ensure atomicity during player balance transfers, preventing partial updates.
@@ -60,12 +81,12 @@ The database schema consists of two main tables:
 
 ## Application Logic
 - **Player Registration/Login**:
-    - A player is automatically registered upon login if the `deviceId` is new.
-    - While a dedicated sign-in method would typically handle this, the current implementation consolidates these operations for simplicity during testing.
+  - A player is automatically registered upon login if the `deviceId` is new.
+  - While a dedicated sign-in method would typically handle this, the current implementation consolidates these operations for simplicity during testing.
 - **Response Handling**:
-    - Server responses leverage Protobuf's `OneOf` to return either a successful response or an error.
+  - Server responses leverage Protobuf's `OneOf` to return either a successful response or an error.
 - **Scalability**:
-    - Redis Pub/Sub is used for notifications, supporting horizontal scaling across multiple server instances.
+  - Redis Pub/Sub is used for notifications, supporting horizontal scaling across multiple server instances.
 
 ---
 
@@ -84,12 +105,12 @@ To containerize and run the application, use the following commands:
 - [x] Add Unit Tests
 - [x] Implement Clean Architecture
 - [x] Validate Core Functionality
-- [ ] Support Horizontal Scaling
+- [x] Support Horizontal Scaling
 - [ ] Add Integration Tests with TestContainers
 - [ ] Dockerize Both Server and Client
 - [x] Validate Database Schema
 - [x] Implement Proper Input Validation
-- [ ] Improve Client Console Output
+- [x] Improve Client Console Output
 - [ ] Enable Client Extensions
 
 ---

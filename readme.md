@@ -59,7 +59,7 @@ The database schema consists of two main tables:
 ## Application Logic
 - **Player Registration/Login**:
   - A player is automatically registered upon login if the `deviceId` is new.
-  - While a dedicated sign-in method would typically handle this, the current implementation consolidates these operations for simplicity during testing.
+  - While a dedicated sign-up method would typically handle this, the current implementation consolidates these operations for simplicity during testing.
 - **Response Handling**:
   - Server responses leverage Protobuf's `OneOf` to return either a successful response or an error. app can be extended by additional messages handlers by implementing the IHandler interface and by registring it to the ioc container. the handler will need to expose a new meesage type in order for it to be correctly routed. 
     ```

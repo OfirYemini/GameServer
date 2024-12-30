@@ -105,7 +105,7 @@ public class WebSocketManager : IWebSocketManager,IDisposable
         if (serverResponse is ServerResponse response && response.LoginResponse != null)
         {
             var playerId = response.LoginResponse.PlayerId;
-
+            //todo: handle thread safety issue when loggin in with same user at the same time 
             if (_activeSessions.ContainsKey(playerId))
             {
                 await SendErrorAsync(webSocket, $"Player {playerId} already connected", connectionId);

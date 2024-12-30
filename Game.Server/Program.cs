@@ -23,10 +23,11 @@ builder.Configuration.GetSection("WebSockets").Bind(wsOptions);
 
 
 var services = builder.Services;
+var dbConnectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=GameServerDb.db";
 
 services.AddDbContextFactory<GameDbContext>(options =>
 {
-    options.UseSqlite("Data Source=GameServerDb.db");
+    options.UseSqlite(dbConnectionString);
     if (builder.Environment.IsDevelopment())
     {
         options.EnableSensitiveDataLogging();

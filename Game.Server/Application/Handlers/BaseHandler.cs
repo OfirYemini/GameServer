@@ -25,7 +25,9 @@ public abstract class BaseHandler<TRequest> : IHandler where TRequest : IMessage
             
             if (!Validate(playerInfo,request,out var errorMessage))
             {
-                return CreateErrorResponse(errorMessage!);
+                var errMsg = CreateErrorResponse(errorMessage!);
+                _logger.LogError("Failed to process request,{errorMessage} error id {errorId}",errMsg.ServerError.Message, errMsg.ServerError.ErrorId);
+                return errMsg;
             }
             
             return await ProcessAsync(playerInfo, request);

@@ -90,7 +90,6 @@ public class GameRepository:IGameRepository
     {
         playerBalance.ResourceBalance += resourceValue;
         playerBalance.RowVersion += 1;
-        dbContext.PlayersBalances.Update(playerBalance);
     }
 
     public async Task<int> TransferResource(int fromPlayer, int toPlayer, Core.Entities.ResourceType resourceType, int resourceValue)

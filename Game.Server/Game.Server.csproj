@@ -42,9 +42,9 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Protobuf Include="Protos\messages.proto">
-            <Generator>MSBuild:Compile</Generator>
-        </Protobuf>
+      <Protobuf Include="Infrastructure\Protos\messages.proto">
+        <Generator>MSBuild:Compile</Generator>
+      </Protobuf>
     </ItemGroup>
 
 </Project>
